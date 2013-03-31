@@ -1,4 +1,4 @@
-// Created on Sun March 24 2013
+ // Created on Sun March 24 2013
 
 void main ()
 {
@@ -118,28 +118,30 @@ void main ()
 	//lower arm
 	
 	printf("-----Step 4-----\n");
-	move_to_position (0, 900, -250);
+	move_to_position (0, 400, -50);
 	
 	angle0 = 0;
 	
 	angle0 = get_create_total_angle (.1);
-	create_drive_direct (200,-200);
+	create_drive_direct (120,-120);
 	
 	while(! loop_done)
 	{
 		printf("a0: %d, a: %d, d: %d\n", angle0, get_create_total_angle (.1), task_A_done);
 		if (angle0 - get_create_total_angle (.1) < 29)
 		{
-			create_drive_direct (200,-200);
+			create_drive_direct (120,-120);
 		}
 		else
 		{
 			task_A_done = 1;
 			create_stop ();
+			msleep(1000);
 		}
 		if (get_motor_done (0))
 		{
 			task_B_done = 1;
+			msleep(1000);
 		}
 		if (task_A_done && task_B_done)
 		{
@@ -165,6 +167,8 @@ void main ()
 		}
 	}
 	
+	
+	
 	loop_done = 0;
 	
 	
@@ -181,14 +185,34 @@ void main ()
 	
 	printf("-----Step 6-----\n");
 	
-	create_drive_straight (150);
+	create_drive_direct (150, 250);
+	
+	distance0 = get_create_distance (.1);
 	
 		
 	while (! loop_done)
 	{
-		if (get_create_lbump() == 1 || get_create_rbump() == 1)
+		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.1), loop_done);
+		if (get_create_distance (.1) - distance0 > 800)
 		{
-			create_stop ();
+			loop_done = 1;
+		}
+	}
+	
+	loop_done = 0;
+	
+	printf("-----Step 6-B-----\n");
+	
+	create_drive_direct (-200, -150);
+	
+	distance0 = get_create_distance (.1);
+	
+	while(! loop_done)
+	{
+		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.1), loop_done);
+		if (get_create_distance (.1) - distance0 < -200)
+		{
+			
 			loop_done = 1;
 		}
 	}
@@ -207,7 +231,7 @@ void main ()
 	while(! loop_done)
 	{
 		printf("a0: %d, a: %d, dA:%d, d: %d\n", angle0, get_create_total_angle (.1), task_A_done);
-		if ((angle0 - get_create_total_angle (.1)) < 135)
+		if ((angle0 - get_create_total_angle (.1)) < -35)
 		{
 			create_drive_direct (-150,150);
 		}

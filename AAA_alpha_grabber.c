@@ -1,12 +1,22 @@
-// Created on Sun March 24 2013
+ // Created on Sun March 24 2013
 
-void main ()
+void main (int argc, char ** argv)
 {
 	int loop_done = 0;
 	int task_A_done = 0;
 	int task_B_done = 0;
 	int angle0 = 0;
 	int distance0 = 0;
+	
+//	float lf_args[20];
+	
+	// read inputs
+//	printf("Args: %d\n", argc);
+//	for (i = 2; i < argc; i++)
+//	{
+//		scanf("%lf%, argv[i]
+//	}
+	
 	
 	
 	//get_create_total_ angle (.1);
@@ -101,7 +111,7 @@ void main ()
 	
 	while(! loop_done)
 	{
-		if (get_create_distance (.1) - distance0 < -540)
+		if (get_create_distance (.1) - distance0 < -470)
 		{
 			
 			loop_done = 1;
@@ -118,28 +128,30 @@ void main ()
 	//lower arm
 	
 	printf("-----Step 4-----\n");
-	move_to_position (0, 900, -250);
+	move_to_position (0, 400, -200);
 	
 	angle0 = 0;
 	
 	angle0 = get_create_total_angle (.1);
-	create_drive_direct (200,-200);
+	create_drive_direct (120,-140);
 	
 	while(! loop_done)
 	{
 		printf("a0: %d, a: %d, d: %d\n", angle0, get_create_total_angle (.1), task_A_done);
-		if (angle0 - get_create_total_angle (.1) < 29)
+		if (angle0 - get_create_total_angle (.1) < 33)
 		{
-			create_drive_direct (200,-200);
+			create_drive_direct (120,-140);
 		}
 		else
 		{
 			task_A_done = 1;
 			create_stop ();
+			msleep(100);
 		}
 		if (get_motor_done (0))
 		{
 			task_B_done = 1;
+			msleep(100);
 		}
 		if (task_A_done && task_B_done)
 		{
@@ -165,6 +177,8 @@ void main ()
 		}
 	}
 	
+	
+	
 	loop_done = 0;
 	
 	
@@ -181,44 +195,48 @@ void main ()
 	
 	printf("-----Step 6-----\n");
 	
-	create_drive_straight (150);
+	create_drive_direct (150, 230);
+	
+	distance0 = get_create_distance (.1);
 	
 		
 	while (! loop_done)
 	{
+		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.1), loop_done);
 		if (get_create_lbump() == 1 || get_create_rbump() == 1)
 		{
-			create_stop ();
+			loop_done = 1;
+		}
+	}
+	
+	loop_done = 0;
+	
+	printf("-----Step 6-B-----\n");
+	
+	create_drive_direct (-270, -150);
+	
+	distance0 = get_create_distance (.1);
+	
+	while(! loop_done)
+	{
+		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.1), loop_done);
+		if (get_create_distance (.1) - distance0 < -150)
+		{
+			
 			loop_done = 1;
 		}
 	}
 	
 	loop_done = 0;
 	// ------------------------------------------------------------------------
-	//step:7 turn clockwise until over transport zone, then drop botguy.
+	//step:7 drop botguy.
 	
 	printf("-----Step 7-----\n");
 	
-	angle0 = 0;
-	
-	angle0 = get_create_total_angle (.1);
-	create_drive_direct (-150,150);
-	
-	while(! loop_done)
-	{
-		printf("a0: %d, a: %d, dA:%d, d: %d\n", angle0, get_create_total_angle (.1), task_A_done);
-		if ((angle0 - get_create_total_angle (.1)) < 135)
-		{
-			create_drive_direct (-150,150);
-		}
-		else
-		{
-			create_stop ();
-			loop_done = 1;
-		}
-	}
 	
 	set_servo_position (0, 200);
+	
+
 
 	
 	create_disconnect ();

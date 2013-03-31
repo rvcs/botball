@@ -174,7 +174,7 @@ void main ()
 	printf("-----Step 5-----\n");
 	
 	set_servo_position (0, 1300);
-	move_to_position (0, -900, -2000);
+	move_to_position (0, -900, -1300);
 	
 	// ------------------------------------------------------------------------
 	//step:6 move backwards untill the bumper hits the transport (not completed)
