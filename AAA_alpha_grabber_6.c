@@ -1,4 +1,7 @@
  // Created on Sun March 24 2013
+int spin ();
+int move ();
+int move_motor ();
 
 void main (int argc, char ** argv)
 {
@@ -11,6 +14,8 @@ void main (int argc, char ** argv)
 	int distance0 = 0;
 	int distance = 0 ;
 	int ddistance = 0;
+	
+	
 	
 //	float lf_args[20];
 	
@@ -46,65 +51,13 @@ void main (int argc, char ** argv)
 	
 	printf("-----Step 1-----\n");
 	
-	move_to_position (0, -900, -1200);
+	move_motor (0, -900, -1200);
 	
+	spin (50, -50, 20);
 	
-	while(! loop_done)
-	{
-		if (get_motor_done (0))
-		{
-			loop_done = 1;
-		}
-
-		msleep(100);
-	}
+	spin (-50, 50, 20);
 	
 	create_stop ();
-	
-	loop_done = 0;
-	
-	angle0 = get_create_total_angle (.05);
-	create_drive_direct (50,-50);
-	
-	while(! loop_done)
-	{
-		printf("a0: %d, a: %d, d: %d\n", angle0, get_create_total_angle (.05), task_A_done);
-		if (angle0 - get_create_total_angle (.05) >= 20)
-		{
-			loop_done = 1;
-			create_stop ();
-		}
-		msleep(100);
-	}
-	
-	loop_done = 0;
-	
-	create_stop ();
-	
-	task_A_done = 0;
-	task_B_done = 0;
-	
-	angle0 = get_create_total_angle (.05);
-	create_drive_direct (-50,50);
-	
-	while(! loop_done)
-	{
-		printf("a0: %d, a: %d, d: %d\n", angle0, get_create_total_angle (.05), task_A_done);
-		if (angle0 - get_create_total_angle (.05) <= -20)
-		{
-			loop_done = 1;
-			create_stop ();
-		}
-		msleep(100);
-	}
-	
-	loop_done = 0;
-	
-	create_stop ();
-	
-	task_A_done = 0;
-	task_B_done = 0;
-	
 	
 	// ------------------------------------------------------------------------
 	//step:2 knock over box and turn
@@ -148,13 +101,8 @@ void main (int argc, char ** argv)
 		printf("a0: %d, a: %d, da: %d, d: %d\n", angle0, get_create_total_angle (.05), dangle , task_A_done);
 	}
 	
-	loop_done = 0;
 	
 	create_stop ();
-	
-	task_A_done = 0;
-	task_B_done = 0;
-	
 
 
 	// ------------------------------------------------------------------------
@@ -164,73 +112,19 @@ void main (int argc, char ** argv)
 	
 	printf("-----Step 4-----\n");
 	
-	angle0 = 0;
-	
-	angle0 = get_create_total_angle (.05);
-	create_drive_direct (70, -70);
-	printf("a0: %d, a: %d\n", angle0, get_create_total_angle(0.05));
-	
-	//while(angle0 - get_create_total_angle (.05) < 4)
-	if (0)
-	{
-		printf("a0: %d, a: %d\n", angle0, get_create_total_angle(0.05));
-		msleep(50);
-	}
-	
 	move_to_position (0, 400, -900);
 	
-	distance0 = get_create_distance (.05);
-	
-	create_drive_direct (20, 20);
-	
-	while (! loop_done)
-		{
-			if (get_create_distance (.05) - distance0 > 50)
-			{	
-			loop_done = 1; 
-			create_stop ();
-			}
-		}
+	move (20, 20, 50);
 	
 	set_servo_position (0 ,400);
 	
-	loop_done = 0;
-	
-	task_A_done = 0;
-	task_B_done = 0;
-	
 	create_drive_straight (-20);
-	move_to_position (0, 600, -300);
 	
-	while (! get_motor_done (0))
-	{
-		msleep (50);
-	}
+	move_motor (0, 600, -300);
 	
 	create_drive_straight (-50);
 	
 	msleep (2200);
-	
-	//while (! loop_done)
-	if (0)
-	{
-		if (digital (10))
-		{
-			create_stop ();
-			
-			loop_done = 1;
-		}
-		if (get_create_distance (.05) - distance0 < -100)
-		{
-			create_stop ();
-			
-			loop_done = 1;
-		}
-	}
-	
-	
-	
-	loop_done = 0;
 	
 	
 	
@@ -238,14 +132,7 @@ void main (int argc, char ** argv)
 	//step:5 grab botguy and lift him up (not complete)
 	printf("-----Step 5-----\n");
 	
-	create_drive_direct (60, -60);
-	
-	while(angle0 - get_create_total_angle (.05) < 3)
-	{
-		msleep(50);
-	}
-	
-	create_stop ();
+	spin (60, -60, 3);
 	
 	set_servo_position (0, 1510);
 	move_to_position (0, -1000, -3000);
@@ -259,22 +146,7 @@ void main (int argc, char ** argv)
 	
 	printf("-----Step 6-----\n");
 	
-	create_drive_direct (130, 280);
-	
-	distance0 = get_create_distance (.05);
-	
-		
-	while (! loop_done)
-	{
-		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.05), loop_done);
-		if (get_create_distance (.05) - distance0 > 700)
-		{
-			loop_done = 1;
-		}
-		msleep(50);
-	}
-	
-	loop_done = 0;
+	move (130, 280, 700);
 	
 	move_to_position (0, -900, -500);
 	create_drive_straight (-20);
@@ -283,131 +155,29 @@ void main (int argc, char ** argv)
 	
 	set_servo_position (0, 200);
 	
-	move_to_position (0, 400, -700);
+	move_motor (0, 400, -700);
 	
-	while (! loop_done)
-	{
-		if (get_motor_done (0))
-		{
-			loop_done = 1;
-		}
-	}
+	spin (50, -50, 85);
 	
-	loop_done = 0;
+	move_motor (0, 400, -400);
 	
-	printf ("------------part 7-b-------------\n");
-	
-	angle0 = 0;
-	
-	angle0 = get_create_total_angle (.05);
-
-	create_drive_direct (50, -50);
-	
-	while (! loop_done)
-	{
-		printf("a0: %d, a: %d\n", angle0, get_create_total_angle(0.05));
-		if (abs ( angle0 - get_create_total_angle (.05)) > 85)
-		{
-			loop_done = 1;
-			create_stop ();
-		}
-		msleep(50);
-	}
-	
-	loop_done = 0;
-	
-	move_to_position (0, 400, -400);
-	
-	while (! loop_done)
-	{
-		if (get_motor_done (0))
-		{
-			loop_done = 1;
-		}
-	}
-	
-	loop_done = 0;
-	
-	create_drive_direct (-100, -100);
-	
-	distance0 = get_create_distance (.05);
-	
-		
-	while (! loop_done)
-	{
-		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.05), loop_done);
-		if (get_create_distance (.05) - distance0 < -50)
-		{
-			loop_done = 1;
-		}
-		msleep(50);
-	}
+	move (-100, -100, 50);
 	
 	loop_done = 0;
 	
 	set_servo_position (0, 1510);
 	
-	angle0 = 0;
-	
-	angle0 = get_create_total_angle (.05);
-
-	create_drive_direct (-50, 50);
-	
-	while (! loop_done)
-	{
-		printf("a0: %d, a: %d\n", angle0, get_create_total_angle(0.05));
-		if (abs ( angle0 - get_create_total_angle (.05)) > 22)
-		{
-			loop_done = 1;
-			create_stop ();
-		}
-		msleep(50);
-	}
-	
-	loop_done = 0;
+	spin (-50, 50, 22);
 	
 	set_servo_position (0, 200);
 	
-	move_to_position (0, 400, -200);
-	
-	while (! loop_done)
-	{
-		if (get_motor_done (0))
-		{
-			loop_done = 1;
-		}
-	}
-	
-	loop_done = 0;
+	move_motor (0, 400, -200);
 	
 	set_servo_position (0, 1510);
 	
-	move_to_position (0, 400, -1900);
+	move_motor (0, 400, -1900);
 	
-	while (! loop_done)
-	{
-		if (get_motor_done (0))
-		{
-			loop_done = 1;
-		}
-	}
-	
-	loop_done = 0;
-	
-	create_drive_direct (-100, -100);
-	
-	distance0 = get_create_distance (.05);
-	
-		
-	while (! loop_done)
-	{
-		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.05), loop_done);
-		if (get_create_distance (.05) - distance0 < -40)
-		{
-			loop_done = 1;
-		}
-		msleep(50);
-	}
+	move (-100, -100, 40);
 	
 	loop_done = 0;
 	
@@ -418,4 +188,64 @@ void main (int argc, char ** argv)
 	create_disconnect ();
 }
 
+int move(int left, int right, int distance)
+{
+	
+	int distance0 = 0;
+	int loop_done = 0;
+	
+	distance0 = get_create_distance (.05);
+	
+	create_drive_direct (left, right);
+		
+	while (! loop_done)
+	{
+		printf("d0: %d, d: %d, d: %d\n", distance0, get_create_distance (.05), loop_done);
+		if (abs (distance0 - get_create_distance (.05)) > distance)
+		{
+			loop_done = 1;
+		}
+		msleep(50);
+	}
+}
+
+
+int spin (int left, int right,int angle)
+{
+	int angle0 = 0;
+	int loop_done = 0;
+	
+	angle0 = get_create_total_angle (.05);
+
+	create_drive_direct (left, right);
+	
+	while (! loop_done)
+	{
+		printf("a0: %d, a: %d\n", angle0, get_create_total_angle(0.05));
+		if (abs ( angle0 - get_create_total_angle (.05)) > angle)
+		{
+			loop_done = 1;
+			create_stop ();
+		}
+		msleep(50);
+	}
+}
+
+int move_motor (int number, int power, int position)
+{
+	int loop_done = 0;
+	
+	move_to_position (number, power, position);
+	
+	
+	while(! loop_done)
+	{
+		if (get_motor_done (number))
+		{
+			loop_done = 1;
+		}
+
+		msleep(100);
+	}
+}
 
