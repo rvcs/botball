@@ -35,6 +35,18 @@ void main (int argc, char ** argv)
 	//clear_motor_position_counter (motor#)
 	//msleep (seconds)
 		//i'll probably use this often
+	//to start by light, do:
+	
+	while(analog(1) > 200)
+	{
+	//we have seen the light
+		msleep(100);
+		if(analog(1) < 800){
+			shut_down_in(190);
+		}
+	}
+	
+		
 	create_connect ();
 	
 	clear_motor_position_counter (0);
@@ -52,7 +64,7 @@ void main (int argc, char ** argv)
 	printf("-----Step 1-----\n");
 	
 	move_motor (0, -900, -1200);
-	
+	// swing arm to hit the box, then get back to position
 	spin (50, -50, 20);
 	
 	spin (-50, 50, 20);
@@ -65,9 +77,9 @@ void main (int argc, char ** argv)
 	//turn 90
 	
 	printf("-----Step 2-----\n");
-	move_to_position (0, -900, -3100);
+	move_to_position (0, -900, -2600);
 	msleep (900);
-	
+	//turn create in a circular position and raise arm so it doesn't hit anything
 	angle0 = get_create_total_angle (.05);
 	angle = angle0;
 	dangle = abs (angle0 - angle);
@@ -76,14 +88,14 @@ void main (int argc, char ** argv)
 	
 	while(! loop_done)
 	{
-		if (dangle >= 125)
-		{
-			create_drive_direct (-120, -181);
-		}
 		if (dangle >= 155)
 		{
 			task_A_done = 1;
 			create_stop ();
+		}
+		else if (dangle >= 125)
+		{
+			create_drive_direct (-120, -181);
 		}
 		
 		if (get_motor_done (0))
@@ -111,6 +123,7 @@ void main (int argc, char ** argv)
 	//lower arm
 	
 	printf("-----Step 4-----\n");
+	//--tweaking position so it gets in just the right position
 	
 	move_to_position (0, 400, -900);
 	
@@ -122,9 +135,31 @@ void main (int argc, char ** argv)
 	
 	move_motor (0, 600, -300);
 	
-	create_drive_straight (-50);
+	create_drive_straight (-50);// at this point, botguy is in his palm
 	
-	msleep (2200);
+	//can't remember function to program
+	
+	msleep (3000);
+	
+	loop_done = 0;
+	
+	if (! loop_done)
+	{
+		create_stop ();
+		if (! digital (10))
+		{
+			move_motor (0, 400, -900);
+			spin (20, -20, 5);
+			move_motor (0, 600, -300);
+			create_stop ();
+			
+			loop_done = 1;
+		}
+		else
+		{
+			loop_done = 1;
+		}
+	}
 	
 	
 	
@@ -133,30 +168,34 @@ void main (int argc, char ** argv)
 	printf("-----Step 5-----\n");
 	
 	spin (60, -60, 5);
-	
+	//close arm and grab botguy
 	set_servo_position (0, 1510);
 	move_to_position (0, -1000, -3000);
-	
-	msleep (5000);
+	//wait for him to finish
+	msleep (7000);
 	
 	
 	
 	// ------------------------------------------------------------------------
-	//step:6 move backwards untill the bumper hits the transport (not completed)
+	//step:6 move backwards till it's in position
 	
 	printf("-----Step 6-----\n");
-	
+	//back up in an arc
 	move (130, 280, 700);
-	
+	//move towards the center and lower drop height
 	move_to_position (0, -900, -500);
 	create_drive_straight (-20);
 	
 	msleep (3000);
-	
+	//drop botguy in transport
 	set_servo_position (0, 200);
+	//start moving towards the pipe
+	move_motor (0, 400, -2900);
 	
-	move_motor (0, 400, -700);
+	create_drive_direct (-10, 10);
+	sleep (130);
 	
+/*
 	spin (50, -50, 85);
 	
 	move_motor (0, 400, -400);
@@ -164,17 +203,11 @@ void main (int argc, char ** argv)
 	move (-100, -100, 50);
 	
 	loop_done = 0;
-	
+	//close arm on pipe
 	set_servo_position (0, 1510);
-	
-	spin (-50, 50, 220);
-	
-	//set_servo_position (0, 200);
-	
-	move_motor (0, 400, -150);
-	
-	//set_servo_position (0, 1510);
-	
+	//turn arm to face the pole
+	spin (-50, 50, 50);
+	//up, forward, then drop pipe
 	move_motor (0, 400, -2300);
 	
 	move (-100, -100, 100);
@@ -182,7 +215,7 @@ void main (int argc, char ** argv)
 	set_servo_position (0, 200);
 	
 	ao ();
-	
+*/
 	create_disconnect ();
 }
 
