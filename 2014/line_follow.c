@@ -19,6 +19,26 @@ int main()
  
 line_follow(void)
 {
+  int left_speed = 0, right_speed = 0;
+  int left, right;
+
+  for (;;) {
+    /* Initialize loop */
+    left = analog10(0);
+    right = analog10(1);
+
+    if (left > DARK && right > DARK) {
+      left_speed = 60, right_speed = 90;
+      position = OUTSIDE;
+      within = 0;
+    }
+
+    /* Set the motor speeds */
+    printf("%4d %4d\n", left, right);
+    motor(LEFT_MOTOR, left_speed);
+    motor(RIGHT_MOTOR, right_speed);
+    msleep(SENSOR_SLEEP);
+  }
         while(start == 1) { //go forward till black line is seen
                 motor(LEFT_MOTOR,100);
                 motor(RIGHT_MOTOR,100);
