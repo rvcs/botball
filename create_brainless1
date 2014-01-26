@@ -1,0 +1,37 @@
+part 1
+
+int main()
+{
+	printf("1\n");
+	create_connect();
+	msleep(2000);
+	printf("2\n");
+	//create_full();
+	create_write_byte(152); //initialization
+	create_write_byte(14); //14 bytes total
+	create_write_byte(158); //wait for:
+	create_write_byte(5); //front bumb 1 byte
+	create_write_byte(145); //go forward mm/s
+	create_write_byte(1); // 256 mm/s 1 byte
+	create_write_byte(44); //44 mm/s + 256 mm/s = 300 mm/s right wheel i think 2 byte
+	create_write_byte(1); //256 3 byte
+	create_write_byte(44); //44 300 mm/s left wheel i think 4 byte
+	create_write_byte(156); //count distance for:
+	create_write_byte(1); //256 mm 1 byte
+	create_write_byte(244); //244mm + 256 mm = 500 mm 2 byte
+	create_write_byte(7); //reboot 1 byte
+	msleep(2000); //sleep 2 secs
+	printf("3\n"); 
+	create_disconnect();
+}
+
+part 2
+
+int main()
+{
+	create_connect();
+	create_write_byte(153); //start
+	msleep(2000);
+	create_disconnect();
+}
+
