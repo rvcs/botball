@@ -5,20 +5,45 @@ int main()
 	enable_servos ();
 	closearm ();
 	elbowdrop ();
+	
+	move_to_shelf();
+	
+	//insert cube finding protocall
+	
+	move_across_board();
+	
+	//move across the board
+	
+	drop_off_cube();
+	
+	ao ();
+}
+
+int move_to_shelf()
+{
 	//move forward towards the cubes
-	move (450, 480, 10000);
+	move (450, 500, 10000);
 	//try to get alligned with the board
 	move (600, 450, 3000);
-	//insert cube finding protocall
+	
+	return 1;
+}
+
+int move_across_board ()
+{
 	msleep (500);
 	move (-500, -500, 1500);
 	//backing up
 	msleep (500);
 	move (-450, 50, 1800);
 	//turn 90 degrees
-	//move (-200, 400, 1000);
 	move (800, 800, 22000);
-	//move across the board
+	
+	return 1;
+}
+
+int drop_off_cube()
+{
 	move (-500, 500, 1600);
 	//turn to the drop-off zone
 	move (300, 300, 1000);
@@ -26,7 +51,8 @@ int main()
 	//scootch forward
 	openarm ();
 	elbowdrop ();
-	ao ();
+	
+	return 1;
 }
 
 int closearm()
