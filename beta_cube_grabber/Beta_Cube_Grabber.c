@@ -42,16 +42,20 @@ int main()
 
 int move_to_shelf()
 {
+	printf("Moving to shelf\n");
+	
 	//move forward towards the cubes
-	move (450, 500, 10000);
+	move (45, 50, 10000);
 	//try to get alligned with the board
-	move (600, 450, 3000);
+	move (60, 45, 3000);
 	
 	return 1;
 }
 
 int move_to_shelf_w_camera()
 {
+	printf("Moving to shelf with camera\n");
+	
 	int objseen = 0;
 	int lcube = 0;
 	int rcube = 0;
@@ -126,23 +130,27 @@ int move_to_shelf_w_camera()
 
 int move_across_board ()
 {
+	printf("Moving to bin\n");
+	
 	msleep (500);
-	move (-500, -500, 1500);
+	move (-50, -50, 1500);
 	//backing up
 	msleep (500);
-	move (-450, 50, 1800);
+	move (-45, 5, 1800);
 	//turn 90 degrees
-	move (800, 800, 22000);
+	move (80, 80, 22000);
 	
 	return 1;
 }
 
 int drop_off_cube()
 {
-	move (-500, 500, 1600);
+	printf("Drop off cube\n");
+	
+	move (-50, 50, 1600);
 	//turn to the drop-off zone
-	move (300, 300, 1000);
-	move (250, 250, 500);
+	move (30, 30, 1000);
+	move (25, 25, 500);
 	//scootch forward
 	openarm ();
 	elbowdrop ();
@@ -172,11 +180,32 @@ int elbowdrop()
 	msleep (300);
 }
 
-int move (int left, int right, int delay)
+int abs(int x)
 {
+	if (x >= 0) {
+		return x;
+	}
+	return -x; 
+}
+
+int move (int left, int right, int distance)
+{
+	int lmpc = 0, rmpc = 0;
+
+	clear_motor_position_counter(LEFT_MOTOR);
+	clear_motor_position_counter(RIGHT_MOTOR);
 	//move_at_velocity (1, left);
-	motor (1, left * 0.1);
+	motor (LEFT_MOTOR, left);
 	//move_at_velocity (2, right);
-	motor (2, right * 0.1);
-	msleep (delay * 0.5);
+	motor (RIGHT_MOTOR, right);
+
+	while(1) {
+		lmpc = get_motor_position_counter(LEFT_MOTOR);
+		rmpc = get_motor_position_counter(RIGHT_MOTOR);
+		if (abs(lmpc) + abs(rmpc) > abs(distance)) {
+			break;
+		}
+	}
+	
+	return 0;
 }
