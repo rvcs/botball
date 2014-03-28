@@ -52,6 +52,60 @@ int move_to_shelf()
 	return 1;
 }
 
+int move_to_shelf_w_camera_2()
+{
+	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
+	int current_rightmost_y = 0;
+	int current_rightmost_x = 0;
+	int current_rightmost = 0;
+	
+	clear_motor_position_counter(LEFT_MOTOR);
+	clear_motor_position_counter(RIGHT_MOTOR);
+	//move_at_velocity (1, left);
+	motor (LEFT_MOTOR, left);
+	//move_at_velocity (2, right);
+	motor (RIGHT_MOTOR, right);
+	
+	while(1) 
+	{
+		camera_update();
+		for (i = 0; i < get_object_count(0); i++)
+		{
+			if (get_object_center(0, i).x> current_rightmost_x)
+			{
+				current_rightmost_x = get_object_center(0, i).x;
+				current_rightmost_y = get_object_center(0, i).y;
+				current_rightmost = i;
+			}
+		}
+		if (current_rightmost_x > 84)
+		{
+			motor (RIGHT_MOTOR, right/2);
+		}
+		
+		else if (current_rightmost_x < 76)
+		{
+			motor (LEFT_MOTOR, left/2);
+		}
+		
+		if (current_rightmost_y < 18)
+		{
+			motor (LEFT_MOTOR, 40);
+			motor (RIGHT_MOTOR, 40);
+			return (0);
+		}
+		
+		//lmpc = get_motor_position_counter(LEFT_MOTOR);
+		//rmpc = get_motor_position_counter(RIGHT_MOTOR);
+		//if (abs(lmpc) + abs(rmpc) > abs(distance))
+		//{
+			//break;
+		//}
+	}
+	
+	return 0;
+}
+
 int move_to_shelf_w_camera()
 {
 	printf("Moving to shelf with camera\n");
