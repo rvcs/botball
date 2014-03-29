@@ -11,8 +11,13 @@
 #define CLAW_OPEN 700
 #define CLAW_CLOSED 200
 
-int main()
+#define CAMERA 3
+#define CAMERA_CENTER_X 110
+
+int main(int argc, char * argv[])
 {
+	int i = 0;
+	
 	//initalise sensors and servos and stuff
 	printf("Hello, World!\n");
 	enable_servos ();
@@ -20,67 +25,233 @@ int main()
 	camera_open();
 	camera_update();
 	msleep(300);
-	printf("initialised hardware\n");
-	
-	arm_to_shelf_height ();
-	set_servo_position (1, 500);
-	
-	if (move_to_shelf_w_camera_2() != 1)
+	printf("initialised hardware... Waiting for light %d\n", argc);
+
+	if (argc == 1)
 	{
-		//wait for button press, that means we hit a cube
-		while (!digital(8))
+		while (analog(0) > 700)
 		{
-			printf(".");
+			msleep(10);
+		}
+		shut_down_in(118.0);
+	}
+
+	for (;;)
+	{
+		set_servo_position(CAMERA, 180);
+		arm_to_shelf_height ();
+		set_servo_position(1, 0);
+
+#if 1
+		if (move_to_shelf_w_camera_2() != 1)
+		{
+			//wait for button press, that means we hit a cube
+			while (1)
+			{
+				printf(".");
+				if (digital(15))
+				{
+					printf("-----------Hit wall.\n");
+					break;
+				}
+				else if (digital(8))
+				{
+					printf("-----------Claw hit.\n");
+
+					//stop, back up
+					stop ();
+					go (-40, -5);
+					msleep(500);
+					go (-20, 0);
+					msleep(500);
+					stop ();
+
+					msleep (300);
+
+					go (10, 10);
+				}
+				
+				msleep (10);
+			}
+		}
+		printf("Hit the cube\n");
+
+#else
+//					msleep(2000);
+	
+#endif
+		// Grab cube
+		finger_grab ();
+
+		// Backup and turn to drop-off corner
+		go (-50, -50);
+		msleep(2200);
+		stop();
+		msleep(200);
+		
+		go (-45, 45);
+		msleep(2500);
+		stop();
+		msleep(200);
+
+		// Point camera down
+		set_servo_position(CAMERA, 335);
+		
+		// Run across the board toward the drop-off zone
+		if (move_to_drop_off() == 99)
+		{
+			return 99;
+		}
+		
+		//wait for button press, that means we hit the PVC at the drop-off
+		while (!digital(15) && !digital(14))
+		{
 			msleep (10);
 		}
-	}
-	printf("Hit the cube\n");
-	
-	//stop, back up
-	stop ();
-	go (-10, -10);
-	msleep(250);
-	stop ();
 
-#if 0
-	//raise arm, open finger
-	set_servo_position (0, 1500);
-	msleep (300);
-#endif
-	finger_wide_open ();
-	msleep (300);
-
-#if 0
-	// Lower arm, go forward
-	arm_to_shelf_height ();
-	msleep (2000);
-#endif
-	go (10, 10);
-	msleep (1250);
-	stop ();
-	
-	// Grab cube
-	finger_grab ();
-
-	// Backup and turn to drop-off corner
-	//set_servo_position (0, 1700);
-
-	go (-50, -50);
-	msleep(1500);
-	go (-45, 45);
-	msleep(1800);
-
-	//wait for button press, that means we hit the PVC at the drop-off
-	go(80, 80);
-	move_to_drop_off();
-	while (!digital(15))
-	{
-		msleep (10);
-	}
+		// Drop off the cube
+//		set_servo_position (0, 1050);
+//		msleep(500);
+		set_servo_position (0, 750);
+		msleep(1700);
+		set_servo_position (1, 0);
+		msleep(2000);
+//		go(0, 0);
+//		return 0;
 		
-	drop_off_cube();
+		// Reverse and look for another orange cube
+//		set_servo_position(0, 1600);
+		go(-10, -10);
+		msleep(100);
+		go(100, -100);
+		msleep(500);
+		arm_to_shelf_height ();
+	}
 	
 	ao ();
+}
+
+int move_to_drop_off()
+{
+	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
+	int current_rightmost_y = 0;
+	int current_rightmost_x = 0;
+	int current_rightmost = -1;
+	int frame_number = 0;
+	
+	printf("Moving to drop-off\n");
+	clear_motor_position_counter(LEFT_MOTOR);
+	clear_motor_position_counter(RIGHT_MOTOR);
+	motor (LEFT_MOTOR, left);
+	motor (RIGHT_MOTOR, right);
+	
+	set_servo_position(CAMERA, 360);
+	
+	while(1) 
+	{
+		//printf("something like about to update camera\n");
+		current_rightmost = -1;
+		if (digital(8) == 1)
+		{
+			return 1;
+		}
+		
+		camera_update();
+		
+		frame_number++;
+		printf("Frame # %d\n", frame_number);
+		if (frame_number < 12)
+		{
+			continue;
+		}
+		
+		if (get_object_count(2) > 8 || get_object_count(2) == 0)
+		{
+			continue;
+		}
+		printf("number_of_objects %d \n", get_object_count(2));
+		
+		for (i = 0; i < get_object_count(2); i++)
+		{
+			if ((float)get_object_bbox(2,i).width/(float)get_object_bbox(2,i).height > 2.0 ||
+				(float)get_object_bbox(2,i).width/(float)get_object_bbox(2,i).height < 0.5)
+			{
+//				if (get_object_center(0,i).y > 19)
+//				{
+//					printf("not square %d \n",i);
+//					continue;
+//				}
+				
+			}
+			
+			if (get_object_center(2,i).y < 20)
+			{
+				printf("too high %d \n",i);
+				continue;
+			}
+			
+			if ((float)get_object_area(2,i) < (float)get_object_area(2,0) *0.5)
+			{
+				printf("too small %d (%d vs %d)\n", i, get_object_area(2,i), get_object_area(2,0));
+				continue;
+			}
+			
+			if (get_object_center(2, i).x > current_rightmost_x || current_rightmost == -1)
+			{
+				current_rightmost_x = get_object_center(2, i).x;
+				current_rightmost_y = get_object_center(2, i).y;
+				current_rightmost = i;
+			}
+		}
+		if (current_rightmost == -1)
+		{
+			continue;
+		}
+		printf("current_rightmost_y %d %d %d \n", current_rightmost,current_rightmost_x, current_rightmost_y);
+		if (current_rightmost_x > 140)
+		{
+			go(left, right/8);
+		}
+		
+		else if (current_rightmost_x > 120)
+		{
+			go(left, right/4);
+		}
+		
+		else if (current_rightmost_x > CAMERA_CENTER_X)
+		{
+			go(left, right/2);
+		}
+		
+		else if (current_rightmost_x < CAMERA_CENTER_X/2)
+		{
+			go(left/8, right);
+		}
+		
+		else if (current_rightmost_x < CAMERA_CENTER_X*3/8)
+		{
+			go(left/4, right);
+		}
+		
+		else if (current_rightmost_x < CAMERA_CENTER_X)
+		{
+			go(left/2, right);
+		}
+		
+		if (current_rightmost_y > 90 && frame_number > 10)
+		{
+			motor (LEFT_MOTOR, left/2);
+			motor (RIGHT_MOTOR, right/2);
+		}
+		if (current_rightmost_y > 95 && frame_number > 10)
+		{
+			printf("Found!!! Off you go\n");
+			return 0;
+		}
+		
+	}
+
+	return 0;
 }
 
 int move_to_shelf()
@@ -113,7 +284,7 @@ int move_to_shelf_w_camera_2()
 	{
 		//printf("something like about to update camera\n");
 		current_rightmost = -1;
-		if (digital(8) == 1)
+		if (digital(8) || digital(15))
 		{
 			return 1;
 		}
@@ -170,28 +341,40 @@ int move_to_shelf_w_camera_2()
 			continue;
 		}
 		printf("current_rightmost_y %d %d %d \n", current_rightmost,current_rightmost_x, current_rightmost_y);
-		if (current_rightmost_x > 105)
+		if (current_rightmost_x > 140)
 		{
 			//go(left, right*6/8);
 			go(left, right/8);
 		}
 		
-		else if (current_rightmost_x > 80)
+		else if (current_rightmost_x > 120)
 		{
 			//go(left, right*7/8);
 			go(left, right/4);
 		}
 		
-		else if (current_rightmost_x < 40)
+		else if (current_rightmost_x > CAMERA_CENTER_X)
+		{
+			//go(left, right*7/8);
+			go(left, right/2);
+		}
+		
+		else if (current_rightmost_x < CAMERA_CENTER_X/2)
 		{
 			//go(left*6/8, right);
 			go(left/8, right);
 		}
 		
-		else if (current_rightmost_x < 80)
+		else if (current_rightmost_x < CAMERA_CENTER_X*3/8)
+		{
+			//go(left*6/8, right);
+			go(left/4, right);
+		}
+		
+		else if (current_rightmost_x < CAMERA_CENTER_X)
 		{
 			//go(left*7/8, right);
-			go(left/4, right);
+			go(left/2, right);
 		}
 		
 		if (current_rightmost_y < 30 && frame_number > 10)
@@ -209,123 +392,6 @@ int move_to_shelf_w_camera_2()
 		
 	}
 	
-	return 0;
-}
-
-int move_to_drop_off()
-{
-	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
-	int current_rightmost_y = 0;
-	int current_rightmost_x = 0;
-	int current_rightmost = -1;
-	int frame_number = 0;
-	
-	printf("Moving to drop-off\n");
-	clear_motor_position_counter(LEFT_MOTOR);
-	clear_motor_position_counter(RIGHT_MOTOR);
-	motor (LEFT_MOTOR, left);
-	motor (RIGHT_MOTOR, right);
-	
-	while(1) 
-	{
-		//printf("something like about to update camera\n");
-		current_rightmost = -1;
-		if (digital(8) == 1)
-		{
-			return 1;
-		}
-		
-		camera_update();
-		
-		frame_number++;
-		printf("Frame # %d\n", frame_number);
-		if (frame_number < 12)
-		{
-			continue;
-		}
-		
-		if (get_object_count(0) > 8 || get_object_count(0) == 0)
-		{
-			continue;
-		}
-		printf("number_of_objects %d \n", get_object_count(0));
-		
-		for (i = 0; i < get_object_count(0); i++)
-		{
-			if ((float)get_object_bbox(0,i).width/(float)get_object_bbox(0,i).height > 2.0 ||
-				(float)get_object_bbox(0,i).width/(float)get_object_bbox(0,i).height < 0.5)
-			{
-//				if (get_object_center(0,i).y > 19)
-//				{
-//					printf("not square %d \n",i);
-//					continue;
-//				}
-				
-			}
-			
-			if (get_object_center(0,i).y < 60)
-			{
-				printf("too high %d \n",i);
-				continue;
-			}
-			
-			if ((float)get_object_area(0,i) < (float)get_object_area(0,0) *0.5)
-			{
-				printf("too small %d (%d vs %d)\n", i, get_object_area(0,i), get_object_area(0,0));
-				continue;
-			}
-			
-			if (get_object_center(0, i).x > current_rightmost_x || current_rightmost == -1)
-			{
-				current_rightmost_x = get_object_center(0, i).x;
-				current_rightmost_y = get_object_center(0, i).y;
-				current_rightmost = i;
-			}
-		}
-		if (current_rightmost == -1)
-		{
-			continue;
-		}
-		printf("current_rightmost_y %d %d %d \n", current_rightmost,current_rightmost_x, current_rightmost_y);
-		if (current_rightmost_x > 105)
-		{
-			go(left, right/8);
-			//motor (RIGHT_MOTOR, right/4);
-		}
-		
-		else if (current_rightmost_x > 80)
-		{
-			go(left, right/4);
-			//motor (RIGHT_MOTOR, right/2);
-		}
-		
-		else if (current_rightmost_x < 40)
-		{
-			go(left/8, right);
-			//motor (LEFT_MOTOR, left/4);
-		}
-		
-		else if (current_rightmost_x < 80)
-		{
-			go(left/4, right);
-			//motor (LEFT_MOTOR, left/2);
-		}
-		
-		if (current_rightmost_y > 90 && frame_number > 10)
-		{
-			//left = left/2;
-			//right = right/2;
-			motor (LEFT_MOTOR, left/2);
-			motor (RIGHT_MOTOR, right/2);
-		}
-		if (current_rightmost_y > 95 && frame_number > 10)
-		{
-			printf("Found!!! Off you go\n");
-			return(0);
-		}
-		
-	}
-
 	return 0;
 }
 
@@ -437,7 +503,7 @@ int drop_off_cube()
 
 int arm_to_shelf_height()
 {
-	set_servo_position (0, 1310);
+	set_servo_position (0, 1340);
 	msleep (300);
 }
 int openarm()
@@ -453,7 +519,7 @@ int finger_wide_open()
 }
 int finger_grab()
 {
-	set_servo_position (1, 550);
+	set_servo_position (1, 650);
 	msleep (300);
 }
 
