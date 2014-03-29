@@ -23,13 +23,28 @@ int main()
 	printf("initialised hardware\n");
 	
 	closearm ();
-	elbowdrop ();
+	set_servo_position (1, 440);
 	
-	move_to_shelf();
-	
-	//move_to_shelf_w_camera();
-	
-	//insert cube finding protocall
+	move_to_shelf_w_camera_2();
+	//wait for button press, that means we hit a cube
+	while (!digital(8))
+	{
+		msleep (10);
+	}
+	//stop, back up
+	go (0, 0);
+	go (-10, -10);
+	msleep(250);
+	stop ();
+	//raise arm and grab cube
+	set_servo_position (0, 1500);
+	msleep (300);
+	fingerup ();
+	go (10, 10);
+	msleep (1250);
+	stop ();
+	closearm ();
+	fingerdrop ();
 	
 	move_across_board();
 	
@@ -54,23 +69,54 @@ int move_to_shelf()
 
 int move_to_shelf_w_camera_2()
 {
+	printf("Moving to shelf with camera\n");
 	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
 	int current_rightmost_y = 0;
 	int current_rightmost_x = 0;
-	int current_rightmost = 0;
+	int current_rightmost = -1;
 	
 	clear_motor_position_counter(LEFT_MOTOR);
 	clear_motor_position_counter(RIGHT_MOTOR);
-	//move_at_velocity (1, left);
 	motor (LEFT_MOTOR, left);
-	//move_at_velocity (2, right);
 	motor (RIGHT_MOTOR, right);
 	
 	while(1) 
 	{
+		//printf("something like about to update camera\n");
+		current_rightmost = -1;
 		camera_update();
+		
+		if (get_object_count(0) > 8 || get_object_count(0) == 0)
+		{
+			continue;
+		}
+		printf("number_of_objects %d \n", get_object_count(0));
+		
 		for (i = 0; i < get_object_count(0); i++)
 		{
+			if ((float)get_object_bbox(0,i).width/(float)get_object_bbox(0,i).height > 2.0 ||
+				(float)get_object_bbox(0,i).width/(float)get_object_bbox(0,i).height < 0.5)
+			{
+				if (get_object_center(0,i).y > 19)
+				{
+				printf("not square %d \n",i);
+				continue;
+				}
+				
+			}
+			
+			if (get_object_center(0,i).y > 60)
+			{
+				printf("too low %d \n",i);
+				continue;
+			}
+			
+			if ((float)get_object_area(0,i) < (float)get_object_area(0,0) *0.8)
+			{
+				printf("too small %d \n", i);
+				continue;
+			}
+			
 			if (get_object_center(0, i).x> current_rightmost_x)
 			{
 				current_rightmost_x = get_object_center(0, i).x;
@@ -78,6 +124,11 @@ int move_to_shelf_w_camera_2()
 				current_rightmost = i;
 			}
 		}
+		if (current_rightmost == -1)
+		{
+			continue;
+		}
+		printf("current_rightmost_y %d %d %d \n", current_rightmost,current_rightmost_x, current_rightmost_y);
 		if (current_rightmost_x > 84)
 		{
 			motor (RIGHT_MOTOR, right/2);
@@ -88,19 +139,18 @@ int move_to_shelf_w_camera_2()
 			motor (LEFT_MOTOR, left/2);
 		}
 		
-		if (current_rightmost_y < 18)
+		if (current_rightmost_y < 25)
 		{
-			motor (LEFT_MOTOR, 40);
-			motor (RIGHT_MOTOR, 40);
-			return (0);
+			left = left/2;
+			right = right/2;
+			motor (LEFT_MOTOR, left);
+			motor (RIGHT_MOTOR, right);
+		}
+		if (current_rightmost_y < 14)
+		{
+			return(0);
 		}
 		
-		//lmpc = get_motor_position_counter(LEFT_MOTOR);
-		//rmpc = get_motor_position_counter(RIGHT_MOTOR);
-		//if (abs(lmpc) + abs(rmpc) > abs(distance))
-		//{
-			//break;
-		//}
 	}
 	
 	return 0;
@@ -207,14 +257,14 @@ int drop_off_cube()
 	move (25, 25, 500);
 	//scootch forward
 	openarm ();
-	elbowdrop ();
+	fingerdrop ();
 	
 	return 1;
 }
 
 int closearm()
 {
-	set_servo_position (0, 1000);
+	set_servo_position (0, 1310);
 	msleep (300);
 }
 int openarm()
@@ -222,15 +272,15 @@ int openarm()
 	set_servo_position (0, 750);
 	msleep (300);
 }
-int elbowup()
+int fingerup()
 {
 	enable_servos ();
-	set_servo_position (1, 890);
+	set_servo_position (1, 0);
 	msleep (300);
 }
-int elbowdrop()
+int fingerdrop()
 {
-	set_servo_position (1, 100);
+	set_servo_position (1, 550);
 	msleep (300);
 }
 
@@ -245,7 +295,7 @@ int abs(int x)
 int move (int left, int right, int distance)
 {
 	int lmpc = 0, rmpc = 0;
-
+	printf("move (int left, int right, int distance) %d %d %d\n", left, right, distance);
 	clear_motor_position_counter(LEFT_MOTOR);
 	clear_motor_position_counter(RIGHT_MOTOR);
 	//move_at_velocity (1, left);
@@ -262,4 +312,15 @@ int move (int left, int right, int distance)
 	}
 	
 	return 0;
+}
+
+int go (int left, int right)
+{
+	motor (LEFT_MOTOR, left);
+	motor (RIGHT_MOTOR, right);
+}
+
+int stop ()
+{
+	go (0,0);
 }
