@@ -11,6 +11,8 @@
 #define CLAW_OPEN 700
 #define CLAW_CLOSED 200
 
+#define ARM_SHELF_HEIGHT 1350
+
 #define CAMERA 3
 #define CAMERA_CENTER_X 110
 
@@ -26,7 +28,7 @@ int main(int argc, char * argv[])
 	camera_update();
 	msleep(300);
 	printf("initialised hardware... Waiting for light %d\n", argc);
-
+#if 0
 	if (argc == 1)
 	{
 		while (analog(0) > 700)
@@ -35,7 +37,7 @@ int main(int argc, char * argv[])
 		}
 		shut_down_in(118.0);
 	}
-
+#endif
 	for (;;)
 	{
 		set_servo_position(CAMERA, 180);
@@ -84,13 +86,15 @@ int main(int argc, char * argv[])
 		finger_grab ();
 
 		// Backup and turn to drop-off corner
+		
+		// THIS IS THE MOST UNRELIABLE THING
 		go (-50, -50);
 		msleep(2200);
 		stop();
 		msleep(200);
 		
 		go (-45, 45);
-		msleep(2500);
+		msleep(2000);
 		stop();
 		msleep(200);
 
@@ -110,19 +114,21 @@ int main(int argc, char * argv[])
 		}
 
 		// Drop off the cube
+		// TEST THIS!!!!!!!!!!!!+
+		
 //		set_servo_position (0, 1050);
 //		msleep(500);
-		set_servo_position (0, 750);
+		set_servo_position (0, 1150);
 		msleep(1700);
 		set_servo_position (1, 0);
 		msleep(2000);
-//		go(0, 0);
-//		return 0;
+		
+		//break;
 		
 		// Reverse and look for another orange cube
 //		set_servo_position(0, 1600);
 		go(-10, -10);
-		msleep(100);
+		msleep(1000);
 		go(100, -100);
 		msleep(500);
 		arm_to_shelf_height ();
@@ -503,8 +509,24 @@ int drop_off_cube()
 
 int arm_to_shelf_height()
 {
-	set_servo_position (0, 1340);
-	msleep (300);
+	set_servo_position (0, ARM_SHELF_HEIGHT);
+#if 0
+	int tick = 0;
+	while(1){
+		tick = get_servo_position(0);
+		if(tick >= 1450 && tick1 <= 1490){
+			break;
+		}
+		if(tick < 1450){
+			tick += 30;
+		}
+		if(tick > 1490){
+			tick -= 30;
+		}
+		set_servo_position (0, tick);
+		msleep (10);
+	}
+#endif
 }
 int openarm()
 {
