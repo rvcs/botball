@@ -10,7 +10,7 @@
 #define CAMERA 3
 
 // Arm positions
-#define ARM_SHELF_HEIGHT 550
+#define ARM_SHELF_HEIGHT 500
 #define ARM_UP 900
 
 #define TOO_FAR_LEFT 55
@@ -48,18 +48,18 @@ int main(int argc, char * argv[])
 	msleep(300);
 	printf("initialised hardware... Waiting for light %d\n", argc);
 
-	//if (argc == 1)
-	//{
+	if (argc == 1)
+	{
 		while (analog(0) > 700)
 		{
 			msleep(10);
 		}
 		shut_down_in(118.0);
-	//}
+	}
 
 	for (;;)
 	{
-		set_servo_position(CAMERA, 100);
+		set_servo_position(CAMERA, 500);
 		arm_to_shelf_height ();
 		set_servo_position(CLAW, 0);
 
@@ -96,10 +96,10 @@ int main(int argc, char * argv[])
 		}
 		printf("Hit the cube\n");
 
-#else
+
 //					msleep(2000);
 	
-#endif
+
 		// Grab cube
 		finger_grab ();
 
@@ -112,12 +112,12 @@ int main(int argc, char * argv[])
 		msleep(200);
 		
 		go (-45, 45);
-		msleep(2000);
+		msleep(1800);
 		stop();
 		msleep(200);
 
 		// Point camera down
-		set_servo_position(CAMERA, 35);
+		set_servo_position(CAMERA, 350);
 		
 		// Run across the board toward the drop-off zone
 		if (move_to_drop_off() == 99)
