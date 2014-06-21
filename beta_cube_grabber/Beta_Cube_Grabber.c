@@ -1,24 +1,43 @@
 // Created on Sat March 15 2014
 
+// Motor port numbers
 #define RIGHT_MOTOR 1
 #define LEFT_MOTOR 0
-#define ARM_UP 900
+
+// Servo port numbers
 #define ARM 0
+#define CLAW 1
+#define CAMERA 3
+
+// Arm positions
+#define ARM_SHELF_HEIGHT 550
+#define ARM_UP 900
+
 #define TOO_FAR_LEFT 55
 #define TOO_FAR_RIGHT 85
 #define CORRECT_HEIGHT 90
-#define CLAW 1
 #define CLAW_OPEN 700
 #define CLAW_CLOSED 200
-
-#define ARM_SHELF_HEIGHT 1350
-
-#define CAMERA 3
 #define CAMERA_CENTER_X 110
+
+void arm_to_shelf_height();
+void go (int left, int right);
+int move (int left, int right, int distance);
+int abs(int x);
+void finger_grab();
+void finger_wide_open();
+void openarm();
+void stop();
+int drop_off_cube();
+int move_across_board();
+int move_to_shelf_w_camera();
+int move_to_shelf_w_camera_2();
+int move_to_shelf();
+int move_to_drop_off();
 
 int main(int argc, char * argv[])
 {
-	int i = 0;
+//	int i = 0;
 	
 	//initalise sensors and servos and stuff
 	printf("Hello, World!\n");
@@ -28,23 +47,22 @@ int main(int argc, char * argv[])
 	camera_update();
 	msleep(300);
 	printf("initialised hardware... Waiting for light %d\n", argc);
-#if 0
-	if (argc == 1)
-	{
+
+	//if (argc == 1)
+	//{
 		while (analog(0) > 700)
 		{
 			msleep(10);
 		}
 		shut_down_in(118.0);
-	}
-#endif
+	//}
+
 	for (;;)
 	{
-		set_servo_position(CAMERA, 180);
+		set_servo_position(CAMERA, 100);
 		arm_to_shelf_height ();
-		set_servo_position(1, 0);
+		set_servo_position(CLAW, 0);
 
-#if 1
 		if (move_to_shelf_w_camera_2() != 1)
 		{
 			//wait for button press, that means we hit a cube
@@ -99,7 +117,7 @@ int main(int argc, char * argv[])
 		msleep(200);
 
 		// Point camera down
-		set_servo_position(CAMERA, 335);
+		set_servo_position(CAMERA, 35);
 		
 		// Run across the board toward the drop-off zone
 		if (move_to_drop_off() == 99)
@@ -116,22 +134,22 @@ int main(int argc, char * argv[])
 		// Drop off the cube
 		// TEST THIS!!!!!!!!!!!!+
 		
-//		set_servo_position (0, 1050);
+//		set_servo_position(ARM, 1050);
 //		msleep(500);
-		set_servo_position (0, 1150);
+		set_servo_position(ARM, 1150);
 		msleep(1700);
-		set_servo_position (1, 0);
+		set_servo_position(CLAW, 0);
 		msleep(2000);
 		
 		//break;
 		
 		// Reverse and look for another orange cube
-//		set_servo_position(0, 1600);
-		go(-10, -10);
-		msleep(1000);
-		go(100, -100);
-		msleep(500);
-		arm_to_shelf_height ();
+//		set_servo_position(ARM, 1600);
+		//go(-10, -10);
+		//msleep(1000);
+		//go(100, -100);
+		//msleep(500);
+		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++arm_to_shelf_height ();
 	}
 	
 	ao ();
@@ -139,7 +157,7 @@ int main(int argc, char * argv[])
 
 int move_to_drop_off()
 {
-	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
+	int /*lmpc = 0, rmpc = 0,*/ left = 80, right = 80, i = 0;
 	int current_rightmost_y = 0;
 	int current_rightmost_x = 0;
 	int current_rightmost = -1;
@@ -274,7 +292,7 @@ int move_to_shelf()
 
 int move_to_shelf_w_camera_2()
 {
-	int lmpc = 0, rmpc = 0, left = 80, right = 80, i = 0;
+	int /*lmpc = 0, rmpc = 0,*/ left = 80, right = 80, i = 0;
 	int current_rightmost_y = 0;
 	int current_rightmost_x = 0;
 	int current_rightmost = -1;
@@ -401,6 +419,7 @@ int move_to_shelf_w_camera_2()
 	return 0;
 }
 
+#if 0
 int move_to_shelf_w_camera()
 {
 	printf("Moving to shelf with camera\n");
@@ -476,6 +495,7 @@ int move_to_shelf_w_camera()
 	}
 	return 1;
 }
+#endif
 
 int move_across_board ()
 {
@@ -507,41 +527,26 @@ int drop_off_cube()
 	return 1;
 }
 
-int arm_to_shelf_height()
+void arm_to_shelf_height()
 {
-	set_servo_position (0, ARM_SHELF_HEIGHT);
-#if 0
-	int tick = 0;
-	while(1){
-		tick = get_servo_position(0);
-		if(tick >= 1450 && tick1 <= 1490){
-			break;
-		}
-		if(tick < 1450){
-			tick += 30;
-		}
-		if(tick > 1490){
-			tick -= 30;
-		}
-		set_servo_position (0, tick);
-		msleep (10);
-	}
-#endif
+	set_servo_position(ARM, ARM_SHELF_HEIGHT);
 }
-int openarm()
+
+void openarm()
 {
-	set_servo_position (0, 750);
+	set_servo_position(ARM, 750);
 	msleep (300);
 }
-int finger_wide_open()
+void finger_wide_open()
 {
 	enable_servos ();
-	set_servo_position (1, 0);
+	set_servo_position(CLAW, 0);
 	msleep (300);
 }
-int finger_grab()
+
+void finger_grab()
 {
-	set_servo_position (1, 650);
+	set_servo_position(CLAW, 650);
 	msleep (300);
 }
 
@@ -575,14 +580,14 @@ int move (int left, int right, int distance)
 	return 0;
 }
 
-int go (int left, int right)
+void go (int left, int right)
 {
 	printf("GO                                                       %d %d\n", left, right);
 	motor (LEFT_MOTOR, left);
 	motor (RIGHT_MOTOR, right);
 }
 
-int stop ()
+void stop ()
 {
 	go (0,0);
 }
