@@ -20,6 +20,28 @@
 #define CLAW_CLOSED 200
 #define CAMERA_CENTER_X 110
 
+int friction_timeA[] = {
+	1800,
+	1800,
+	1800,
+	1800,
+	1800,
+	1800,
+	1800,
+	1800
+};
+
+int friction_timeB[] = {
+	500,
+	500,
+	500,
+	500,
+	500,
+	500,
+	500,
+	500
+};
+
 void arm_to_shelf_height();
 void go (int left, int right);
 int move (int left, int right, int distance);
@@ -38,6 +60,7 @@ int move_to_drop_off();
 int main(int argc, char * argv[])
 {
 //	int i = 0;
+	int loop_count = 0;
 	
 	//initalise sensors and servos and stuff
 	printf("Hello, World!\n");
@@ -48,14 +71,14 @@ int main(int argc, char * argv[])
 	msleep(300);
 	printf("initialised hardware... Waiting for light %d\n", argc);
 
-	if (argc == 1)
-	{
-		while (analog(0) > 700)
+//	if (argc == 1)
+//	{
+		while (analog(0) > 700 && a_button() == 0)
 		{
 			msleep(10);
 		}
 		shut_down_in(118.0);
-	}
+//	}
 
 	for (;;)
 	{
@@ -112,7 +135,7 @@ int main(int argc, char * argv[])
 		msleep(200);
 		
 		go (-45, 45);
-		msleep(1800);
+		msleep(friction_timeA[loop_count]);			// This number is dependent on the friction of the surface
 		stop();
 		msleep(200);
 
@@ -148,8 +171,10 @@ int main(int argc, char * argv[])
 		//go(-10, -10);
 		//msleep(1000);
 		//go(100, -100);
-		//msleep(500);
+		//msleep(friction_timeB[loop_count]);			// This number is dependent on the friction of the surface
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++arm_to_shelf_height ();
+		
+		loop_count += 1;
 	}
 	
 	ao ();
