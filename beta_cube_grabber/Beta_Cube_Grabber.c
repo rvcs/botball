@@ -10,7 +10,7 @@
 #define CAMERA 3
 
 // Arm positions
-#define ARM_SHELF_HEIGHT 500
+#define ARM_SHELF_HEIGHT 550
 #define ARM_UP 900
 
 #define TOO_FAR_LEFT 55
@@ -18,7 +18,10 @@
 #define CORRECT_HEIGHT 90
 #define CLAW_OPEN 700
 #define CLAW_CLOSED 200
-#define CAMERA_CENTER_X 110
+#define CAMERA_CENTER_X_1 60
+#define CAMERA_CENTER_X_2 30
+
+#define CYLINDER 3
 
 int friction_timeA[] = {
 	1800,
@@ -61,7 +64,8 @@ int main(int argc, char * argv[])
 {
 //	int i = 0;
 	int loop_count = 0;
-	
+	set_servo_position (ARM, 1200);
+	set_servo_position (CLAW, 0);
 	//initalise sensors and servos and stuff
 	printf("Hello, World!\n");
 	enable_servos ();
@@ -70,7 +74,9 @@ int main(int argc, char * argv[])
 	camera_update();
 	msleep(300);
 	printf("initialised hardware... Waiting for light %d\n", argc);
-
+	set_servo_position (CLAW, 0);
+	set_servo_position (CAMERA, 500);
+	set_servo_position (ARM, 1400);
 //	if (argc == 1)
 //	{
 		while (analog(0) > 700 && a_button() == 0)
@@ -82,9 +88,10 @@ int main(int argc, char * argv[])
 
 	for (;;)
 	{
-		set_servo_position(CAMERA, 500);
+		set_servo_position(CAMERA, 640);
 		arm_to_shelf_height ();
 		set_servo_position(CLAW, 0);
+		
 
 		if (move_to_shelf_w_camera_2() != 1)
 		{
@@ -125,22 +132,23 @@ int main(int argc, char * argv[])
 
 		// Grab cube
 		finger_grab ();
+		
 
 		// Backup and turn to drop-off corner
 		
 		// THIS IS THE MOST UNRELIABLE THING
 		go (-50, -50);
-		msleep(2200);
+		msleep(1200);
 		stop();
 		msleep(200);
 		
 		go (-45, 45);
-		msleep(friction_timeA[loop_count]);			// This number is dependent on the friction of the surface
+		msleep(1750);			// This number is dependent on the friction of the surface
 		stop();
 		msleep(200);
 
 		// Point camera down
-		set_servo_position(CAMERA, 350);
+		set_servo_position(CAMERA, 450);
 		
 		// Run across the board toward the drop-off zone
 		if (move_to_drop_off() == 99)
@@ -152,14 +160,15 @@ int main(int argc, char * argv[])
 		while (!digital(15) && !digital(14))
 		{
 			msleep (10);
+			
 		}
 
 		// Drop off the cube
 		// TEST THIS!!!!!!!!!!!!+
-		
+		stop();
 //		set_servo_position(ARM, 1050);
 //		msleep(500);
-		set_servo_position(ARM, 1150);
+		set_servo_position(ARM, 850);
 		msleep(1700);
 		set_servo_position(CLAW, 0);
 		msleep(2000);
@@ -175,14 +184,15 @@ int main(int argc, char * argv[])
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++arm_to_shelf_height ();
 		
 		loop_count += 1;
+		break;
 	}
-	
+	msleep (2000);
 	ao ();
 }
 
 int move_to_drop_off()
 {
-	int /*lmpc = 0, rmpc = 0,*/ left = 80, right = 80, i = 0;
+	int /*lmpc = 0, rmpc = 0,*/ left = 70, right = 80, i = 0;
 	int current_rightmost_y = 0;
 	int current_rightmost_x = 0;
 	int current_rightmost = -1;
@@ -194,7 +204,7 @@ int move_to_drop_off()
 	motor (LEFT_MOTOR, left);
 	motor (RIGHT_MOTOR, right);
 	
-	set_servo_position(CAMERA, 360);
+	set_servo_position(CAMERA, 450);
 	
 	while(1) 
 	{
@@ -214,16 +224,16 @@ int move_to_drop_off()
 			continue;
 		}
 		
-		if (get_object_count(2) > 8 || get_object_count(2) == 0)
+		if (get_object_count(CYLINDER) > 8 || get_object_count(CYLINDER) == 0)
 		{
 			continue;
 		}
-		printf("number_of_objects %d \n", get_object_count(2));
+		printf("number_of_objects %d \n", get_object_count(CYLINDER));
 		
-		for (i = 0; i < get_object_count(2); i++)
+		for (i = 0; i < get_object_count(CYLINDER); i++)
 		{
-			if ((float)get_object_bbox(2,i).width/(float)get_object_bbox(2,i).height > 2.0 ||
-				(float)get_object_bbox(2,i).width/(float)get_object_bbox(2,i).height < 0.5)
+			if ((float)get_object_bbox(CYLINDER,i).width/(float)get_object_bbox(CYLINDER,i).height > 2.0 ||
+				(float)get_object_bbox(CYLINDER,i).width/(float)get_object_bbox(CYLINDER,i).height < 0.5)
 			{
 //				if (get_object_center(0,i).y > 19)
 //				{
@@ -232,23 +242,23 @@ int move_to_drop_off()
 //				}
 				
 			}
-			
-			if (get_object_center(2,i).y < 20)
+
+			if (get_object_center(CYLINDER,i).y < 20)
 			{
 				printf("too high %d \n",i);
 				continue;
 			}
 			
-			if ((float)get_object_area(2,i) < (float)get_object_area(2,0) *0.5)
+			if ((float)get_object_area(CYLINDER,i) < (float)get_object_area(CYLINDER,0) *0.5)
 			{
-				printf("too small %d (%d vs %d)\n", i, get_object_area(2,i), get_object_area(2,0));
+				printf("too small %d (%d vs %d)\n", i, get_object_area(CYLINDER,i), get_object_area(CYLINDER,0));
 				continue;
 			}
 			
-			if (get_object_center(2, i).x > current_rightmost_x || current_rightmost == -1)
+			if (get_object_center(CYLINDER, i).x > current_rightmost_x || current_rightmost == -1)
 			{
-				current_rightmost_x = get_object_center(2, i).x;
-				current_rightmost_y = get_object_center(2, i).y;
+				current_rightmost_x = get_object_center(CYLINDER, i).x;
+				current_rightmost_y = get_object_center(CYLINDER, i).y;
 				current_rightmost = i;
 			}
 		}
@@ -267,22 +277,22 @@ int move_to_drop_off()
 			go(left, right/4);
 		}
 		
-		else if (current_rightmost_x > CAMERA_CENTER_X)
+		else if (current_rightmost_x > CAMERA_CENTER_X_2)
 		{
 			go(left, right/2);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X/2)
+		else if (current_rightmost_x < CAMERA_CENTER_X_2/2)
 		{
 			go(left/8, right);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X*3/8)
+		else if (current_rightmost_x < CAMERA_CENTER_X_2*3/8)
 		{
 			go(left/4, right);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X)
+		else if (current_rightmost_x < CAMERA_CENTER_X_2)
 		{
 			go(left/2, right);
 		}
@@ -402,25 +412,25 @@ int move_to_shelf_w_camera_2()
 			go(left, right/4);
 		}
 		
-		else if (current_rightmost_x > CAMERA_CENTER_X)
+		else if (current_rightmost_x > CAMERA_CENTER_X_1)
 		{
 			//go(left, right*7/8);
 			go(left, right/2);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X/2)
+		else if (current_rightmost_x < CAMERA_CENTER_X_1/2)
 		{
 			//go(left*6/8, right);
 			go(left/8, right);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X*3/8)
+		else if (current_rightmost_x < CAMERA_CENTER_X_1*3/8)
 		{
 			//go(left*6/8, right);
 			go(left/4, right);
 		}
 		
-		else if (current_rightmost_x < CAMERA_CENTER_X)
+		else if (current_rightmost_x < CAMERA_CENTER_X_1)
 		{
 			//go(left*7/8, right);
 			go(left/2, right);
