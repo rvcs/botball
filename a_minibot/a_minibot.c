@@ -1,4 +1,4 @@
-// Created on Sat June 21 2014
+// minib Created on Sat June 21 2014
 
 // Motor port numbers
 #define RIGHT_MOTOR 2
@@ -6,7 +6,7 @@
 
 #define ARM_SERVO 0
 
-#define ARM_UP 1504
+#define ARM_UP 1153
 #define ARM_DOWN 622
 
 void go (int left, int right);
@@ -25,10 +25,14 @@ int main()
 	}
 	shut_down_in(118.0);
 	
-	go(90, 90);
-	msleep(7200);
+	msleep (25000);
 	
+	go(90, 90);
+	msleep(6700);
 	stop();
+	
+	
+	
 	msleep(100);
 	printf("stopped\n");
 	set_servo_position(ARM_SERVO, ARM_DOWN);
