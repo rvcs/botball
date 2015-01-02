@@ -7,10 +7,11 @@
 // Servo port numbers
 #define ARM 0
 #define CLAW 1
+
 #define CAMERA 3
 
 // Arm positions
-#define ARM_SHELF_HEIGHT 550
+#define ARM_SHELF_HEIGHT 570
 #define ARM_UP 900
 
 #define TOO_FAR_LEFT 55
@@ -138,12 +139,12 @@ int main(int argc, char * argv[])
 		
 		// THIS IS THE MOST UNRELIABLE THING
 		go (-50, -50);
-		msleep(1200);
+		msleep(2800);
 		stop();
 		msleep(200);
 		
 		go (-45, 45);
-		msleep(1750);			// This number is dependent on the friction of the surface
+		msleep(1400);			// This number is dependent on the friction of the surface
 		stop();
 		msleep(200);
 
@@ -192,7 +193,7 @@ int main(int argc, char * argv[])
 
 int move_to_drop_off()
 {
-	int /*lmpc = 0, rmpc = 0,*/ left = 70, right = 80, i = 0;
+	int /*lmpc = 0, rmpc = 0,*/ left = 80, right = 90, i = 0;
 	int current_rightmost_y = 0;
 	int current_rightmost_x = 0;
 	int current_rightmost = -1;
@@ -203,6 +204,10 @@ int move_to_drop_off()
 	clear_motor_position_counter(RIGHT_MOTOR);
 	motor (LEFT_MOTOR, left);
 	motor (RIGHT_MOTOR, right);
+	
+	go (50, 50);
+	msleep (10000);
+	stop ();
 	
 	set_servo_position(CAMERA, 450);
 	
