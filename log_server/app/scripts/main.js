@@ -34,8 +34,8 @@ function sketchProc(pr) {
         if (bbox) {
           pr.fill(255, 255, 255);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
-		  pr.fill(255, 255, 255);
-		  pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+          pr.fill(255, 255, 255);
+          pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
         }
       });
     }
@@ -46,8 +46,8 @@ function sketchProc(pr) {
         if (bbox) {
           pr.fill(221, 255, 0);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
-		  pr.fill(255, 255, 255);
-		  pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+          pr.fill(255, 255, 255);
+          pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
         }
       });
     }
@@ -59,8 +59,8 @@ function sketchProc(pr) {
           if (bbox) {
             pr.fill(194, 84, 0);
             pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
-			pr.fill(255, 255, 255);
-			pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+            pr.fill(255, 255, 255);
+            pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
           }
         });
       }
