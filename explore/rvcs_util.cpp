@@ -4,19 +4,33 @@
 #include "kovan/kovan.h"
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 
 using std::string;
 
 char* itoa(int num, char* str, int base);
 
 namespace rvcs {
+  int state_to_run = -1, state_to_stop = -1;
+
   int norm_x(int x);
   int norm_y(int y);
 
   int cam_height = 0, cam_width = 0, half_cam_height = 0, half_cam_width = 0;
 
-  int start(int s0_pos, int s1_pos, int s2_pos, int s3_pos) {
+  int start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState) {
     int result = 1;
+    int state = defState;
+
+    int x = 0;
+    for (int i = 1; i < argc; ++i) {
+      x = atoi(argv[i]);
+      if (x < 100 && state_to_run == -1) {
+        state_to_run = state = x;
+      } else if (x < 100) {
+        state_to_stop = x;
+      }
+    }
 
     set_camera_config_base_path("/etc/botui/channels");
 
@@ -34,7 +48,7 @@ namespace rvcs {
     
     log("==START==", -999);
 
-    return result;
+    return state;
   }
 
   void end() {
@@ -42,6 +56,15 @@ namespace rvcs {
     camera_close();
     disable_servos();
     alloff();
+  }
+
+  bool rvcs_should_run_loop(int ctrl_state) {
+    if (state_to_run == -1) { return true; }
+
+    if (state_to_stop == -1 && state_to_run != ctrl_state) { return false; }
+    if (state_to_stop == ctrl_state) { return false; }
+
+    return true;
   }
 
   void move(int left, int right) {

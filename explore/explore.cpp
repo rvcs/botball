@@ -108,9 +108,7 @@ int main(int argc, char *argv[])
   event_time = end_of_time;
 
   // Startup
-  if (!rvcs::start(/*arm*/ 1300, /*finger*/ 500, 0, /*eye*/ 600)) {
-    die();
-  }
+  ctrl_state = (e_ctrl_state)rvcs::start(argc, argv, /*arm*/ 1300, /*finger*/ 500, 0, /*eye*/ 600, (int)ctrl_state);
 
   // The main loop
   int left_power = 0, right_power = 0;
@@ -118,7 +116,7 @@ int main(int argc, char *argv[])
   int loop_num, num_frames = 0;
   
   bool halt = false;
-  for (loop_num = 1; !halt; ++loop_num, last_ctrl_state = ctrl_state) {
+  for (loop_num = 1; !halt && rvcs_should_run_loop(ctrl_state); ++loop_num, last_ctrl_state = ctrl_state) {
     loop_start_time = seconds();
     if (transitioning_to_this_state()) {
         transition_time = loop_start_time;

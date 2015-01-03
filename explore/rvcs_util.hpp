@@ -7,8 +7,10 @@
 #include <deque>
 
 namespace rvcs {
-  int  start(int s0_pos, int s1_pos, int s2_pos, int s3_pos);
+  int  start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState);
   int  die(char const * msg = NULL);
+
+  bool rvcs_should_run_loop(int ctrl_state);
 
   int               rvcs_camera_update();
   struct rectangle  rvcs_object_bbox(int channel, int obj_id);

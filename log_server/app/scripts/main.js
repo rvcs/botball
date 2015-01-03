@@ -17,7 +17,7 @@ if (vScale < theScale) {
   theScale = vScale;
 }
 
-var normBbox, scale, fetch;
+var normBbox, normPt, scale, fetch;
 
 var frame = {};
 
@@ -105,6 +105,15 @@ var processingInstance = new Processing(canvas, sketchProc);  // jshint ignore:l
 
 scale = function(x) {
   return x * theScale;
+};
+
+normPt = function(point) {
+  var result = {};
+
+  result.x = Math.floor(scale(point.x) + width/2);
+  result.y = Math.floor(height/2 - scale(point.y));
+
+  return result;
 };
 
 normBbox = function(bbox) {
