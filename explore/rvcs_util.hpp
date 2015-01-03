@@ -7,7 +7,7 @@
 #include <deque>
 
 namespace rvcs {
-  int  start();
+  int  start(int s0_pos, int s1_pos, int s2_pos, int s3_pos);
   int  die(char const * msg = NULL);
 
   int               rvcs_camera_update();
@@ -21,6 +21,7 @@ namespace rvcs {
 
   void log(char const * var_name, double value);
   void log(char const * var_name, int value, char const * comment = NULL);
+  void log(char const * format, char const * var_name, int a, int b);
   void log(char const * var_name, int which, int value, char const * comment = NULL);
   void log(char const * var_name, bool value);
   void log(char const * var_name, struct rectangle const & value);

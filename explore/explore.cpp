@@ -1,5 +1,16 @@
 // Created on Sun December 28 2014
 
+// arm:
+//     1300 - down
+//     500  - grab
+#define ARM_HIT_SHELF 600
+
+// finger:
+//     750  - clinch tight
+//     500  - semi-tight grip on cube
+//     150  - straight
+//     
+
 #include "rvcs_util.hpp"
 #include "kovan/kovan.h"
 #include <iostream>
@@ -9,18 +20,28 @@ using namespace std;
 
 bool want_new_blobs();
 bool want_yellow_blocks();
+double time_since_event();
+double time_since_transition();
+
+
 bool ctrl_state_approach_orange();
-void log_ctrl_state();
+void log_ctrl_state(char const * msg);
 
 enum e_ctrl_state {
   ctrl_state_first = 1, 
-  ctrl_state_rotate_to_find_orange_right,
-    ctrl_state_rotate_to_find_orange_rightB,
-  ctrl_state_approach_orange_right, 
-    ctrl_state_approach_orange_right_max,
+  
+  ctrl_state_init,
+  ctrl_state_wait_for_light,
+  
+  ctrl_state_rotate_to_find_orange_perp,        // Out in front of shelves, rotate to be perpendicular to shelves -- initial
+    ctrl_state_rotate_to_find_orange_perpB,     // Out in front of shelves, rotate to be perpendicular to shelves -- rotate until we see blocks
+  ctrl_state_approach_orange_perp, 
+    ctrl_state_approach_orange_perp_max,
 
   other_to_end_ctrl_state
 };
+
+void log_move_mode(char const * msg);
 
 enum e_move_mode {
   move_mode_none = 1,
@@ -35,6 +56,8 @@ enum e_move_mode {
   other_to_end_move_mode
 };
 
+void log_eye_mode(char const * msg);
+
 enum e_eye_mode {
   eye_mode_none = 1,
   eye_mode_normal,
@@ -43,20 +66,49 @@ enum e_eye_mode {
   other_to_end_eye_mode
 };
 
-enum e_arm_state {
+void log_arm_mode(char const * msg);
+
+enum e_arm_mode {
+  arm_mode_none = 1,
+  arm_mode_down,
+  arm_mode_hit_top_shelf,
+  arm_mode_grab_top_cube,
+  arm_mode_drop_cube,
+  
+  arm_mode_end
 };
 
-e_ctrl_state ctrl_state = ctrl_state_rotate_to_find_orange_right;
-e_eye_mode  eye_mode  = eye_mode_normal;
-e_move_mode move_mode = move_mode_none;
+void log_finger_mode(char const * msg);
 
+enum e_finger_mode {
+  finger_mode_none = 1,
+  finger_mode_straight,
+  finger_mode_grip,
+  
+  finger_mode_end
+};
+
+e_ctrl_state  ctrl_state      = ctrl_state_init;
+e_ctrl_state  last_ctrl_state = ctrl_state_init;
+bool transitioning_to_this_state() {
+  return ctrl_state != last_ctrl_state;
+}
+
+e_eye_mode    eye_mode    = eye_mode_none;
+e_move_mode   move_mode   = move_mode_none;
+e_arm_mode    arm_mode    = arm_mode_none;
+e_finger_mode finger_mode = finger_mode_none;
+
+double event_time = 0.0, transition_time = 0.0;
 int main(int argc, char *argv[])
 {
-  int i = 0;
-  double start_time = seconds(), loop_start_time = 0;
+  //int i = 0;
+  double start_time = seconds(), end_of_time = seconds() + 3600.0, loop_start_time = 0;
+  transition_time = start_time;
+  event_time = end_of_time;
 
   // Startup
-  if (!rvcs::start()) {
+  if (!rvcs::start(/*arm*/ 1300, /*finger*/ 500, 0, /*eye*/ 600)) {
     die();
   }
 
@@ -64,12 +116,21 @@ int main(int argc, char *argv[])
   int left_power = 0, right_power = 0;
   int eye_pos = 0, eye_pos_max = 100000, eye_pos_min = -100000;
   int loop_num, num_frames = 0;
+  
   bool halt = false;
-  for (loop_num = 1; !halt; ++loop_num) {
+  for (loop_num = 1; !halt; ++loop_num, last_ctrl_state = ctrl_state) {
+    loop_start_time = seconds();
+    if (transitioning_to_this_state()) {
+        transition_time = loop_start_time;
+    }
+    
     log("__________________________________a", 0);
     log("loop_num", loop_num);
-    log("loop_start_time", loop_start_time = seconds());
-    log_ctrl_state();
+    log("loop_start_time", loop_start_time);
+    log_ctrl_state("ctrl_start");
+    log_eye_mode("ctrl_start");
+    log_arm_mode("ctrl_start");
+    log_finger_mode("ctrl_start");
 
     BlobList blobs, blobsYellow, removed, removedYellow;
 
@@ -116,9 +177,16 @@ int main(int argc, char *argv[])
     eye_pos_min = 500;
     eye_pos_max = 750;
 
-    if (ctrl_state == ctrl_state_rotate_to_find_orange_right) {
+    
+    if (ctrl_state == ctrl_state_init) {
+      ctrl_state = ctrl_state_wait_for_light;
+
+    } else if (ctrl_state == ctrl_state_wait_for_light) {
+      ctrl_state = ctrl_state_rotate_to_find_orange_perp;
+      
+    } else if (ctrl_state == ctrl_state_rotate_to_find_orange_perp) {
       move_mode = move_mode_spin_ccw;
-      ctrl_state = ctrl_state_rotate_to_find_orange_rightB;
+      ctrl_state = ctrl_state_rotate_to_find_orange_perpB;
 
     } else if (ctrl_state_approach_orange()) {
       blobs = rvcs_objects(0);
@@ -144,34 +212,38 @@ int main(int argc, char *argv[])
 
       // We've shortened the list to just the decent ones... We may have to handle two
       blobs = first(blobs, 2, &removed);
-      if (ctrl_state == ctrl_state_rotate_to_find_orange_rightB) {
+      log(removed, "object", "removed_lower_quality_objects");
+      
+      // We have a good list of blobs; what should we do (based on the control state)
+      if (ctrl_state == ctrl_state_rotate_to_find_orange_perpB) {
         blobsYellow = first(blobsYellow, 2, &removedYellow);
-        log(blobsYellow, "object", "good_objectsY");
+        log(blobsYellow, "objectY", "good_objects");
         blobs = score_by_nx(blobs);
         if (blobs.size() > 0 && blobsYellow.size() >= 2) {
-          ctrl_state = ctrl_state_approach_orange_right;
+          ctrl_state = ctrl_state_approach_orange_perp;
+          arm_mode   = arm_mode_hit_top_shelf;
         } else {
           //move_mode = move_mode_target_prime_blob_spin;
         }
-      } else if (ctrl_state == ctrl_state_approach_orange_right) {
-        if (blobs.size() > 1) {
-          blobs = score_by_x(blobs);
-        }
+      } else if (ctrl_state == ctrl_state_approach_orange_perp) {
+        blobs = score_by_x(blobs);
+
         if (blobs.size() > 0) {
           move_mode = move_mode_target_prime_blob_move;
+          if (time_since_transition() > 1.5) {
+            eye_mode = eye_mode_target_prime_blob;
+          }
         }
-      }
-      log(removed, "object", "removed_lower_quality_objects");
-
-      if (blobs.size() > 0) {
-        eye_mode = eye_mode_target_prime_blob;
       }
     }
 
     log(blobs, "object", "good_objects");
-    //log(removed, "object", "removed_objects");
+    log_ctrl_state("ctrl_end");
+    log_eye_mode("ctrl_end");
+    log_arm_mode("ctrl_end");
+    log_finger_mode("ctrl_end");
 
-    // Action
+    // ----------------------------- Actions ------------------------------------
     Blob const & targetBlob = head(blobs);
 
     if (eye_mode == eye_mode_normal) {
@@ -184,6 +256,7 @@ int main(int argc, char *argv[])
     if (eye_pos > eye_pos_max) { eye_pos = eye_pos_max; }
     if (eye_pos < eye_pos_min) { eye_pos = eye_pos_min; }
     rvcs_set_servo(3, eye_pos);
+log("test", 1);
 
     if (move_mode == move_mode_spin) {
       left_power = 80; right_power = -20;
@@ -204,6 +277,25 @@ int main(int argc, char *argv[])
       right_power -= 20;
     }
     move(left_power, right_power);
+log("test", 2);
+
+    if (arm_mode == arm_mode_down) {
+      rvcs_set_servo(0, 1300);
+    } else if (arm_mode == arm_mode_hit_top_shelf) {
+      rvcs_set_servo(0, ARM_HIT_SHELF);
+    } else if (arm_mode == arm_mode_grab_top_cube) {
+      rvcs_set_servo(0, 500);
+    } else if (arm_mode == arm_mode_drop_cube) {
+      rvcs_set_servo(0, 1100); //?????
+    }
+log("test", 3);
+    
+    if (finger_mode == finger_mode_straight) {
+      rvcs_set_servo(1, 150);
+    } else if (finger_mode == finger_mode_grip) {
+      rvcs_set_servo(1, 500);
+    }
+log("test", 4);
 
     log("loop_compute_time", seconds() - loop_start_time);
     if (time_since(start_time) > 10.0) { break; }
@@ -223,29 +315,77 @@ bool want_yellow_blocks() {
 }
 
 bool ctrl_state_approach_orange() {
-  if (ctrl_state >= ctrl_state_approach_orange_right && ctrl_state <= ctrl_state_approach_orange_right_max) {
+  if (ctrl_state >= ctrl_state_approach_orange_perp && ctrl_state <= ctrl_state_approach_orange_perp_max) {
     return true;
   }
 
-  if (ctrl_state == ctrl_state_rotate_to_find_orange_rightB) {
+  if (ctrl_state == ctrl_state_rotate_to_find_orange_perpB) {
     return true;
   }
 
   return false;
 }
 
-char const * name(e_ctrl_state enu) {
+char const * to_name(e_ctrl_state enu) {
   switch(enu) {
-    case ctrl_state_rotate_to_find_orange_right:  return "ctrl_state_rotate_to_find_orange_right"; break;
-    case ctrl_state_rotate_to_find_orange_rightB:  return "ctrl_state_rotate_to_find_orange_rightB"; break;
-    case ctrl_state_approach_orange_right:     return "ctrl_state_approach_orange_right";     break;
-    case ctrl_state_approach_orange_right_max: return "ctrl_state_approach_orange_right_max"; break;
+    case ctrl_state_rotate_to_find_orange_perp:  return "ctrl_state_rotate_to_find_orange_perp"; break;
+    case ctrl_state_rotate_to_find_orange_perpB:  return "ctrl_state_rotate_to_find_orange_perpB"; break;
+    case ctrl_state_approach_orange_perp:     return "ctrl_state_approach_orange_perp";     break;
+    case ctrl_state_approach_orange_perp_max: return "ctrl_state_approach_orange_perp_max"; break;
   }
 
   return "unknown";
 }
 
-void log_ctrl_state() {
-  log("ctrl_state", ctrl_state, name(ctrl_state));
+void log_ctrl_state(char const * msg) {
+  string name("ctrl_state_");
+  name += msg;
+  log(name.c_str(), ctrl_state, to_name(ctrl_state));
 }
 
+char const * to_name(e_eye_mode enu) {
+  switch(enu) {
+  }
+
+  return "unknown";
+}
+
+void log_eye_mode(char const * msg) {
+  string name("eye_mode_");
+  name += msg;
+  log(name.c_str(), eye_mode, to_name(eye_mode));
+}
+
+char const * to_name(e_arm_mode enu) {
+  switch(enu) {
+  }
+
+  return "unknown";
+}
+
+void log_arm_mode(char const * msg) {
+  string name("arm_mode_");
+  name += msg;
+  log(name.c_str(), arm_mode, to_name(arm_mode));
+}
+
+char const * to_name(e_finger_mode enu) {
+  switch(enu) {
+  }
+
+  return "unknown";
+}
+
+void log_finger_mode(char const * msg) {
+  string name("finger_mode_");
+  name += msg;
+  log(name.c_str(), finger_mode, to_name(finger_mode));
+}
+
+double time_since_event() {
+  return seconds() - event_time;
+}
+
+double time_since_transition() {
+  return seconds() - transition_time;
+}

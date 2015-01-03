@@ -15,7 +15,7 @@ namespace rvcs {
 
   int cam_height = 0, cam_width = 0, half_cam_height = 0, half_cam_width = 0;
 
-  int start() {
+  int start(int s0_pos, int s1_pos, int s2_pos, int s3_pos) {
     int result = 1;
 
     set_camera_config_base_path("/etc/botui/channels");
@@ -26,9 +26,33 @@ namespace rvcs {
     result = result && camera_load_config("orange");
     if (!result) { die("camera_load_config failed"); }
 
+    set_servo_position(0, s0_pos);
+    set_servo_position(1, s1_pos);
+    set_servo_position(2, s2_pos);
+    set_servo_position(3, s3_pos);
     enable_servos();
+    
+    log("==START==", -999);
 
     return result;
+  }
+
+  void end() {
+    log("==END==", -999);
+    camera_close();
+    disable_servos();
+    alloff();
+  }
+
+  void move(int left, int right) {
+    motor(0, left);
+    motor(1, right);
+    log("%s: left:%d right:%d\n", "motor", left, right);
+  }
+
+  void rvcs_set_servo(int servo_num, int pos) {
+    set_servo_position(servo_num, pos);
+    log("servo", servo_num, pos);
   }
 
   int  rvcs_camera_update() {
@@ -66,16 +90,6 @@ namespace rvcs {
     return result;
   }
 
-  void move(int left, int right) {
-    motor(0, left);
-    motor(1, right);
-  }
-
-  void rvcs_set_servo(int servo_num, int pos) {
-    set_servo_position(servo_num, pos);
-    log("servo", servo_num, pos);
-  }
-
   int die(char const * msg_) {
     char const * msg = msg_ ? msg_ : "";
     printf("Dying: %s\n", msg);
@@ -107,6 +121,10 @@ namespace rvcs {
     log(name.c_str(), value, comment);
   }
 
+  void log(char const * format, char const * var_name, int a, int b) {
+    printf(format, var_name, a, b);
+  }
+  
   void log(char const * var_name, bool value) {
     printf("%s: %s\n", var_name, value ? "1" : "0");
   }
@@ -117,12 +135,6 @@ namespace rvcs {
 
   void log(char const * var_name, struct rectangle const & value) {
     printf("%s: x:%d y:%d w:%d h:%d\n", var_name, value.ulx, value.uly, value.width, value.height);
-  }
-
-  void end() {
-    camera_close();
-    disable_servos();
-    alloff();
   }
 
   static Blob theNullBlob(false);
