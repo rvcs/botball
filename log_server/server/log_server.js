@@ -5,10 +5,17 @@ var http = require('http');
 var urlLib = require('url');
 var util = require('util');
 
+var tcpPort = 8402, defHttpPort = 8502, httpPort = defHttpPort;
+
 var mkkeyvP; // like mkdir -p but for objects
 var valueOf;
 
 var data = [], currLoopNum = -1, stableLoopNum;
+
+if (process.argv.length > 2) {
+  httpPort = process.argv[2];
+  tcpPort += (httpPort - defHttpPort);
+}
 
 // Listen for TCP stream, it is data from the bot
 var server = net.createServer(function(c) {
@@ -27,7 +34,7 @@ var server = net.createServer(function(c) {
     _.each(lines, function(line) {
       var m;
       
-      if (line === '--START--') {
+      if (line === '==START==') {
         data = [];
       } else if ((m = /^([a-zA-Z0-9_]+): *([^;]*)/.exec(line))) {
         var name = m[1], value = {};
@@ -84,7 +91,8 @@ var server = net.createServer(function(c) {
 
 });
 
-server.listen(8401);
+console.log("Listening for TCP data on: " + tcpPort);
+server.listen(tcpPort);
 
 http.createServer(function(req, res) {
   var url       = urlLib.parse(req.url, true);
@@ -148,7 +156,8 @@ http.createServer(function(req, res) {
 
   res.writeHead(200, {'Content-Type': 'application/javascript'});
   res.end(url.query.callback + "(" + JSON.stringify(result) + ");");
-}).listen(9011);
+}).listen(httpPort);
+console.log("Listening for HTTP on: " + httpPort);
 
 var mkOneKey = function(obj, key) {
   'use strict';

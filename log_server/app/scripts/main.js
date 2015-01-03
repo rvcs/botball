@@ -4,6 +4,12 @@ var botWidth = 160, botHeight = 120;
 var hScale = width / botWidth, theScale = hScale;
 var vScale = height / botHeight;
 
+var startData    = g_startData || {};      // jshint ignore:line
+startData.port   = startData.port || 8502;
+startData.server = startData.server || "192.168.11.111";
+
+var config = {port:startData.port, server:startData.server};
+
 var fetchDelay = 750;
 var startFrameNum = 18;
 
@@ -71,7 +77,8 @@ function sketchProc(pr) {
 var fetch = function(frameNum) {
   "use strict";
   $.ajax({
-    url: "http://192.168.11.117:9011/frame",
+    //url: "http://192.168.11.117:9011/frame",
+    url: "http://" + config.server + ":" + config.port + "/frame",
     data:{id:frameNum},
     dataType: "jsonp",
     success:function(data) {
@@ -103,19 +110,22 @@ scale = function(x) {
 normBbox = function(bbox) {
   var result = {};
 
-  result.x = scale(bbox.x) + width/2;
-  result.y = height/2 - scale(bbox.y);
-  result.w = scale(bbox.w);
-  result.h = scale(-bbox.h);
+  result.x = Math.floor(scale(bbox.x) + width/2);
+  result.y = Math.floor(height/2 - scale(bbox.y));
+  result.w = Math.floor(scale(bbox.w));
+  result.h = Math.floor(scale(-bbox.h));
 
   return result;
 };
 
 setTimeout(function() {
   $.ajax({
-    url: "http://192.168.11.117:9011/restart",
+    //url: "http://192.168.11.117:9011/restart",
+    url: "http://" + config.server + ":" + config.port + "/restart",
+    data: startData,
     dataType: "jsonp",
-    success:function() {
+    success:function(data) {
+      config = _.extend({}, startData, config, data);           // jshint ignore:line
       fetch(startFrameNum);
     }
   });
