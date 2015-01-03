@@ -4,8 +4,8 @@ var botWidth = 160, botHeight = 120;
 var hScale = width / botWidth, theScale = hScale;
 var vScale = height / botHeight;
 
-var fetchDelay = 1200;
-var startFrameNum = 3;
+var fetchDelay = 750;
+var startFrameNum = 18;
 
 if (vScale < theScale) {
   theScale = vScale;
@@ -65,7 +65,7 @@ function sketchProc(pr) {
 var fetch = function(frameNum) {
   "use strict";
   $.ajax({
-    url: "http://localhost:9011/frame",
+    url: "http://192.168.11.117:9011/frame",
     data:{id:frameNum},
     dataType: "jsonp",
     success:function(data) {
@@ -107,7 +107,7 @@ normBbox = function(bbox) {
 
 setTimeout(function() {
   $.ajax({
-    url: "http://localhost:9011/restart",
+    url: "http://192.168.11.117:9011/restart",
     dataType: "jsonp",
     success:function() {
       fetch(startFrameNum);
