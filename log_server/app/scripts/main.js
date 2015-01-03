@@ -34,6 +34,8 @@ function sketchProc(pr) {
         if (bbox) {
           pr.fill(255, 255, 255);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
+		  pr.fill(255, 255, 255);
+		  pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
         }
       });
     }
@@ -42,8 +44,10 @@ function sketchProc(pr) {
       frame.good_objectsY.forEach(function(obj) {
         var bbox = normBbox(obj.bbox);
         if (bbox) {
-          pr.fill(0, 255, 255);
+          pr.fill(221, 255, 0);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
+		  pr.fill(255, 255, 255);
+		  pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
         }
       });
     }
@@ -53,8 +57,10 @@ function sketchProc(pr) {
         frame[key].forEach(function(obj) {
           var bbox = normBbox(obj.bbox);
           if (bbox) {
-            pr.fill(204, 102, 0);
+            pr.fill(194, 84, 0);
             pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
+			pr.fill(255, 255, 255);
+			pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
           }
         });
       }
