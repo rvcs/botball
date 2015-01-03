@@ -16,7 +16,7 @@ var server = net.createServer(function(c) {
 
   c.setEncoding('utf8');
 
-  var dict = {}, currObjectTypes, currObjectNum;
+  var dict = {}, currObjectTypes, currObjectNum, currObjectName;
 
   var remainder = '';
   c.on('data', function(chunk) {
@@ -25,8 +25,11 @@ var server = net.createServer(function(c) {
     remainder = lines.pop();
 
     _.each(lines, function(line) {
-      var m = /^([a-zA-Z0-9_]+): *([^;]*)/.exec(line);
-      if (m) {
+      var m;
+      
+      if (line === '--START--') {
+        data = [];
+      } else if ((m = /^([a-zA-Z0-9_]+): *([^;]*)/.exec(line))) {
         var name = m[1], value = {};
         var rest = m[2];
 
@@ -52,15 +55,19 @@ var server = net.createServer(function(c) {
           currLoopNum = valueOf(value);
           data[value] = data[value] || {};
         } else if (/^good_objects/i.exec(name)) {
-        //} else if (name === 'good_objects') {
           currObjectTypes = name;
         } else if (/^removed.*objects/i.exec(name)) {
           currObjectTypes = name;
-        } else if (name === 'object') {
+        } else if (/^object/i.exec(name)) {
+          currObjectName = name;
           currObjectNum = value;
 
         } else if (name in {area:true, bbox:true, center:true, centroid:true, skininess:true, score:true}) {
-          mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
+          if (currObjectName === 'object' || currObjectTypes !== 'good_objects') {
+            mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
+          } else {
+            mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
+          }
         } else if (/^servo_/i.exec(name)) {
           mkkeyvP(data, currLoopNum, name, value);
         } else if (name in {'loop_start_time':true, 'ctrl_state':true, 'loop_compute_time':true}) {
@@ -83,6 +90,8 @@ http.createServer(function(req, res) {
   var url       = urlLib.parse(req.url, true);
   var query     = url.query;
   var pathParts = _.rest(url.pathname.split('/'));
+  
+  var stableLoopNumAtStart = stableLoopNum;
 
   var result = {_meta:{}};
 
@@ -110,6 +119,12 @@ http.createServer(function(req, res) {
         result.frameNum = valueOf(id);
         result.frame = data[id];
         return sendResult();
+      }
+      
+      /* otherwise, see if stableLoopNum has jumped backward (the bot has restarted) */
+      if (stableLoopNum < stableLoopNumAtStart) {
+        id = stableLoopNum;
+        return tryAndGetIt();
       }
 
       /* otherwise, don't have the item... wait for it */
