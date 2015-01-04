@@ -6,7 +6,7 @@ var vScale = height / botHeight;
 
 var startData    = g_startData || {};      // jshint ignore:line
 startData.port   = startData.port || 8502;
-startData.server = startData.server || "192.168.11.111";
+startData.server = startData.server || "192.168.11.113";
 
 var config = {port:startData.port, server:startData.server};
 
@@ -21,12 +21,15 @@ var normBbox, normPt, scale, fetch;
 
 var frame = {};
 
+
+
 function sketchProc(pr) {
   "use strict";
 
   pr.size(width, height);
 
   pr.draw = function() {
+    var i;
     pr.background(128);
 
     pr.strokeWeight(1);
@@ -35,26 +38,32 @@ function sketchProc(pr) {
 
     pr.strokeWeight(3);
     if (frame.good_objects) {
+      i = 1;
       frame.good_objects.forEach(function(obj) {
         var bbox = normBbox(obj.bbox);
         if (bbox) {
           pr.fill(255, 255, 255);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
-          pr.fill(255, 255, 255);
-          pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+          pr.fill(0, 0, 255);
+          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x, bbox.y);
+          
         }
-      });
+        i++;
+      }); 
     }
 
     if (frame.good_objectsY) {
+      i = 1;
       frame.good_objectsY.forEach(function(obj) {
         var bbox = normBbox(obj.bbox);
         if (bbox) {
           pr.fill(221, 255, 0);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
-          pr.fill(255, 255, 255);
-          pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+          pr.fill(0, 0, 0);
+          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x, bbox.y);
+          
         }
+        i++;
       });
     }
 
@@ -66,7 +75,7 @@ function sketchProc(pr) {
             pr.fill(194, 84, 0);
             pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
             pr.fill(255, 255, 255);
-            pr.text("(" + bbox.x + "," + bbox.y + ")", bbox.x, bbox.y);
+            pr.text("(" + obj.bbox.x + "," + obj.bbox.y + ")", bbox.x, bbox.y);
           }
         });
       }

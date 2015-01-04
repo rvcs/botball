@@ -1,5 +1,5 @@
 
-var _    = require('underscore');
+var _    = require('./underscore');
 var net  = require('net');
 var http = require('http');
 var urlLib = require('url');
