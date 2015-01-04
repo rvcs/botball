@@ -45,7 +45,7 @@ function sketchProc(pr) {
           pr.fill(255, 255, 255);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
           pr.fill(0, 0, 255);
-          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x, bbox.y);
+          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x + bbox.w/3, bbox.y + bbox.h/3);
           
         }
         i++;
@@ -60,7 +60,7 @@ function sketchProc(pr) {
           pr.fill(221, 255, 0);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
           pr.fill(0, 0, 0);
-          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x, bbox.y);
+          pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x + bbox.w/3, bbox.y + bbox.h/3);
           
         }
         i++;
@@ -75,7 +75,7 @@ function sketchProc(pr) {
             pr.fill(194, 84, 0);
             pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
             pr.fill(255, 255, 255);
-            pr.text("(" + obj.bbox.x + "," + obj.bbox.y + ")", bbox.x, bbox.y);
+            pr.text("(" + obj.bbox.x + "," + obj.bbox.y + ")", bbox.x + bbox.w/3, bbox.y + bbox.h/3);
           }
         });
       }
