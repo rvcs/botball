@@ -6,7 +6,8 @@ var vScale = height / botHeight;
 
 var startData    = g_startData || {};      // jshint ignore:line
 startData.port   = startData.port || 8502;
-startData.server = startData.server || "192.168.11.113";
+//startData.server = startData.server || "192.168.11.111";
+startData.server = startData.server || "192.168.11.117";
 
 var config = {port:startData.port, server:startData.server};
 

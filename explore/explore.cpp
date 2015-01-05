@@ -23,7 +23,6 @@ bool want_yellow_blocks();
 double time_since_event();
 double time_since_transition();
 
-
 bool ctrl_state_approach_orange();
 void log_ctrl_state(char const * msg);
 
@@ -246,7 +245,6 @@ int main(int argc, char *argv[])
 
     if (eye_mode == eye_mode_normal) {
       eye_pos = 600;
-      eye_mode = eye_mode_none;
     } else if (eye_mode == eye_mode_target_prime_blob) {
       // Put the prime blob onto the x-axis (y==0)
       eye_pos = get_servo_position(3) + targetBlob.center.y;
@@ -254,7 +252,6 @@ int main(int argc, char *argv[])
     if (eye_pos > eye_pos_max) { eye_pos = eye_pos_max; }
     if (eye_pos < eye_pos_min) { eye_pos = eye_pos_min; }
     rvcs_set_servo(3, eye_pos);
-log("test", 1);
 
     if (move_mode == move_mode_spin) {
       left_power = 80; right_power = -20;
@@ -275,7 +272,6 @@ log("test", 1);
       right_power -= 20;
     }
     move(left_power, right_power);
-log("test", 2);
 
     if (arm_mode == arm_mode_down) {
       rvcs_set_servo(0, 1300);
@@ -286,14 +282,12 @@ log("test", 2);
     } else if (arm_mode == arm_mode_drop_cube) {
       rvcs_set_servo(0, 1100); //?????
     }
-log("test", 3);
     
     if (finger_mode == finger_mode_straight) {
       rvcs_set_servo(1, 150);
     } else if (finger_mode == finger_mode_grip) {
       rvcs_set_servo(1, 500);
     }
-log("test", 4);
 
     log("loop_compute_time", seconds() - loop_start_time);
     if (time_since(start_time) > 10.0) { break; }

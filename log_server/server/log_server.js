@@ -71,9 +71,16 @@ var server = net.createServer(function(c) {
 
         } else if (name in {area:true, bbox:true, center:true, centroid:true, skininess:true, score:true}) {
           if (currObjectName === 'object' || currObjectTypes !== 'good_objects') {
+            console.log('obj1', currLoopNum, currObjectTypes, currObjectNum, name, value);
             mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
           } else {
-            mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
+            m = /^object(.*)$/.exec(currObjectName);
+            console.log('obj2', currLoopNum, currObjectTypes, currObjectNum, name, value, m);
+            if (m) {
+              mkkeyvP(data, currLoopNum, [currObjectTypes + m[1]], currObjectNum, name, value);
+            } else {
+              mkkeyvP(data, currLoopNum, [currObjectTypes], currObjectNum, name, value);
+            }
           }
         } else if (/^servo_/i.exec(name)) {
           mkkeyvP(data, currLoopNum, name, value);
