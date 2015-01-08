@@ -3,7 +3,8 @@
 // arm:
 //     1300 - down
 //     500  - grab
-#define ARM_HIT_SHELF 600
+#define ARM_HIT_SHELF 650
+#define ARM_GRAB_TOP_CUBE 600
 
 // finger:
 //     750  - clinch tight
@@ -17,6 +18,10 @@
 
 using namespace rvcs;
 using namespace std;
+
+#define CUBE_X_OFFSET (-50)
+#define BASE_MOTOR_SPEED_TARGETING 50
+#define TARGETING_MOTOR_MULTIPLE   (1.0/2.0)
 
 bool want_new_blobs();
 bool want_yellow_blocks();
@@ -36,6 +41,11 @@ enum e_ctrl_state {
     ctrl_state_rotate_to_find_orange_perpB,     // Out in front of shelves, rotate to be perpendicular to shelves -- rotate until we see blocks
   ctrl_state_approach_orange_perp, 
     ctrl_state_approach_orange_perp_max,
+    
+  ctrl_state_backup_to_grab_cube,
+  ctrl_state_forward_to_grab_cube,
+  ctrl_state_grab_cube,
+  ctrl_state_backup_from_orange_cube,
 
   other_to_end_ctrl_state
 };
@@ -44,6 +54,7 @@ void log_move_mode(char const * msg);
 
 enum e_move_mode {
   move_mode_none = 1,
+  move_mode_stop,
   move_mode_spin,
   move_mode_spin_ccw,
   move_mode_target_prime_blob_spin,
@@ -51,6 +62,9 @@ enum e_move_mode {
 
   move_mode_back_and_to_right,
   move_mode_back_and_to_left,
+  
+  move_mode_forward,
+  move_mode_backup,
 
   other_to_end_move_mode
 };
@@ -115,11 +129,12 @@ int main(int argc, char *argv[])
   int loop_num, num_frames = 0;
   
   bool halt = false;
-  for (loop_num = 1; !halt && rvcs_should_run_loop(ctrl_state); ++loop_num, last_ctrl_state = ctrl_state) {
+  for (loop_num = 1; !halt && rvcs_should_run_loop(ctrl_state); ++loop_num) {
     loop_start_time = seconds();
     if (transitioning_to_this_state()) {
         transition_time = loop_start_time;
     }
+    last_ctrl_state = ctrl_state;
     
     log("__________________________________a", 0);
     log("loop_num", loop_num);
@@ -131,7 +146,7 @@ int main(int argc, char *argv[])
 
     BlobList blobs, blobsYellow, removed, removedYellow;
 
-    if (digital(8) || digital(15) || digital(14)) {
+    if (digital(15) || digital(14)) {
       halt = true;
       break;
     }
@@ -223,14 +238,42 @@ int main(int argc, char *argv[])
           //move_mode = move_mode_target_prime_blob_spin;
         }
       } else if (ctrl_state == ctrl_state_approach_orange_perp) {
-        blobs = score_by_x(blobs);
+        if (digital(8)) {
+          ctrl_state = ctrl_state_backup_to_grab_cube;
+          move_mode = move_mode_stop;
+        } else {
+          blobs = score_by_x(blobs);
 
-        if (blobs.size() > 0) {
-          move_mode = move_mode_target_prime_blob_move;
-          if (time_since_transition() > 1.5) {
-            eye_mode = eye_mode_target_prime_blob;
+          if (blobs.size() > 0) {
+            move_mode = move_mode_target_prime_blob_move;
+            if (time_since_transition() > 1.5) {
+              eye_mode = eye_mode_target_prime_blob;
+            }
           }
         }
+      }
+    } else if (ctrl_state == ctrl_state_backup_to_grab_cube) {
+      move_mode = move_mode_backup;
+      if (time_since_transition() > 1.0) {
+        ctrl_state = ctrl_state_forward_to_grab_cube;
+      }
+    } else if (ctrl_state == ctrl_state_forward_to_grab_cube) {
+      finger_mode = finger_mode_straight;
+      arm_mode = arm_mode_grab_top_cube;
+      move_mode = move_mode_forward;
+      if (time_since_transition() > 1.2) {
+        ctrl_state = ctrl_state_grab_cube;
+      }
+    } else if (ctrl_state == ctrl_state_grab_cube) {
+      move_mode = move_mode_stop;
+      if (time_since_transition() > 0.4) {
+        finger_mode = finger_mode_grip;
+        ctrl_state = ctrl_state_backup_from_orange_cube;
+      }
+    } else if (ctrl_state == ctrl_state_backup_from_orange_cube) {
+      move_mode = move_mode_back_and_to_left;
+      if (time_since_transition() > 1.5) {
+        halt = true;
       }
     }
 
@@ -243,8 +286,8 @@ int main(int argc, char *argv[])
     // ----------------------------- Actions ------------------------------------
     Blob const & targetBlob = head(blobs);
 
+    eye_pos = 600;
     if (eye_mode == eye_mode_normal) {
-      eye_pos = 600;
     } else if (eye_mode == eye_mode_target_prime_blob) {
       // Put the prime blob onto the x-axis (y==0)
       eye_pos = get_servo_position(3) + targetBlob.center.y;
@@ -261,15 +304,23 @@ int main(int argc, char *argv[])
       left_power  = targetBlob.center.x / 5;
       right_power = (targetBlob.center.x / 5) * -1;
     } else if (move_mode ==   move_mode_target_prime_blob_move) {
-      left_power = right_power = 70;
-      left_power += targetBlob.center.x / 5;
-      right_power -= targetBlob.center.x / 5;
-    } else if (move_mode == move_mode_back_and_to_right) {
-      left_power = right_power = -50;
-      left_power -= 20;
+      left_power = right_power = BASE_MOTOR_SPEED_TARGETING;
+      left_power += (targetBlob.center.x - CUBE_X_OFFSET) * TARGETING_MOTOR_MULTIPLE;
+      right_power -= (targetBlob.center.x - CUBE_X_OFFSET) * TARGETING_MOTOR_MULTIPLE;
     } else if (move_mode == move_mode_back_and_to_left) {
       left_power = right_power = -50;
+      left_power -= 20;
+      right_power += 20;
+    } else if (move_mode == move_mode_back_and_to_right) {
+      left_power = right_power = -50;
       right_power -= 20;
+      left_power += 20;
+    } else if (move_mode == move_mode_stop) {
+      left_power = right_power = 0;
+    } else if (move_mode == move_mode_backup) {
+      left_power = right_power = -70;
+    } else if (move_mode == move_mode_forward) {
+      left_power = right_power = 70;
     }
     move(left_power, right_power);
 
@@ -278,7 +329,7 @@ int main(int argc, char *argv[])
     } else if (arm_mode == arm_mode_hit_top_shelf) {
       rvcs_set_servo(0, ARM_HIT_SHELF);
     } else if (arm_mode == arm_mode_grab_top_cube) {
-      rvcs_set_servo(0, 500);
+      rvcs_set_servo(0, ARM_GRAB_TOP_CUBE);
     } else if (arm_mode == arm_mode_drop_cube) {
       rvcs_set_servo(0, 1100); //?????
     }
@@ -290,7 +341,7 @@ int main(int argc, char *argv[])
     }
 
     log("loop_compute_time", seconds() - loop_start_time);
-    if (time_since(start_time) > 10.0) { break; }
+    if (time_since(start_time) > 20.0) { break; }
     //if (loop_num > 10) { break; }
   }
 

@@ -23,7 +23,7 @@ size_t buf_len = sizeof(buf);
 
 int doit(int argc, char * argv[])
 {
-  short port = 8401;
+  short port = 8402;
   char const * log_host_ip = "192.168.11.117";
   if (argc > 1) {
     log_host_ip = argv[1];
@@ -42,7 +42,7 @@ int doit(int argc, char * argv[])
 
   memset(&log_host_addr, 0, sizeof(log_host_addr));
   log_host_addr.sin_family = AF_INET;
-  log_host_addr.sin_port = htons(8401);
+  log_host_addr.sin_port = htons(port);
   inet_pton(AF_INET, log_host_ip, &log_host_addr.sin_addr);
 
   int fd = 0;
