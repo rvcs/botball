@@ -1,7 +1,7 @@
 // Created on Sat January 17 2015
 
-void forward(int power);
-void right(int power);
+void forward(int power, int time);
+void right(int power, int time);
 
 
 int main()
@@ -9,29 +9,29 @@ int main()
 	printf("Hello, World!\n");
 	msleep(2500);
 	printf("Botguy\n");
-	forward(100);
-	right(100);
-	forward(100);
-	right(100);
-	forward(100);
-	right(100);
-	forward(100);
+	forward(100, 500);
+	right(100, 500);
+	forward(100, 500);
+	right(100, 500);
+	forward(100, 500);
+	right(100, 500);
+	forward(100, 500);
 	return 0;
 }
 
-void forward(int power)
+void forward(int power, int time)
 {
 	motor(0, power);
 	motor(1, power);
-	msleep(500);
+	msleep(time);
 	ao();
-	msleep(500);
+	msleep(time);
 }
 
-void right(int power)
+void right(int power, int time)
 {
 	motor(1, power);
-	msleep(500);
+	msleep(time);
 	ao();
-	msleep(500);
+	msleep(time);
 }
