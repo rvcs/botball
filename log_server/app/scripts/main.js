@@ -39,22 +39,26 @@ function sketchProc(pr) {
 
     pr.strokeWeight(3);
     if (frame.good_objects) {
-      i = 1;
+      i = 0;
       frame.good_objects.forEach(function(obj) {
         var bbox = normBbox(obj.bbox);
         if (bbox) {
+          if (i === 0){
+            pr.strokeWeight(1);
+            pr.line(bbox.x + bbox.w/2, 0, bbox.x + bbox.w/2, 800);
+            pr.line(0, bbox.y + bbox.h/2, 800, bbox.y + bbox.h/2);
+          }
           pr.fill(255, 255, 255);
           pr.rect(bbox.x, bbox.y, bbox.w, bbox.h);
           pr.fill(0, 0, 255);
           pr.text(i + " (" + obj.bbox.x + "," + obj.bbox.y + ") ", bbox.x + bbox.w/3, bbox.y + bbox.h/3);
-          
         }
         i++;
       }); 
     }
 
     if (frame.good_objectsY) {
-      i = 1;
+      i = 0;
       frame.good_objectsY.forEach(function(obj) {
         var bbox = normBbox(obj.bbox);
         if (bbox) {
