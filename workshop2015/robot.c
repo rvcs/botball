@@ -8,6 +8,20 @@ int main()
 	msleep(2500);
 	printf("jordan\n");
 	
+	
+	enable_servos();
+	set_servo_position(0, 822);
+	msleep(3000);	
+	set_servo_position(0,1665);
+	
+	msleep(3000);
+	set_servo_position(0, 822);
+	msleep(3000);	
+	set_servo_position(0,1665);
+	msleep(3000);
+	disable_servos();
+	
+	return 0;
 	driveand_turnright(80);
 	
 	driveand_turnright(80);
