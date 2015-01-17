@@ -9,11 +9,14 @@ int main()
 	printf("Hello, World!\n");
 	msleep(2500);
 	printf("Botguy\n");
-	set_servo_position(3, 1000)
+	enable_servos();
+	set_servo_position(3, 800);
 	forward(100, 500);
 	right(100, 500);
+	set_servo_position(3, 600);
 	forward(100, 500);
 	right(100, 500);
+	set_servo_position(3, 1000);
 	forward(100, 500);
 	right(100, 500);
 	forward(100, 500);
