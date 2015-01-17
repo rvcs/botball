@@ -11,7 +11,10 @@ using std::string;
 char* itoa(int num, char* str, int base);
 
 namespace rvcs {
-  int state_to_run = -1, state_to_stop = -1;
+  int state_to_run = -1, state_to_stop = -1, last_ctrl_state = -1;
+  double loop_start_time = 0.0;
+  static char object_name[64];
+  static char * object_suffix = NULL;
 
   int norm_x(int x);
   int norm_y(int y);
@@ -31,6 +34,9 @@ namespace rvcs {
         state_to_stop = x;
       }
     }
+
+    strcpy(object_name, "object");
+    object_suffix = object_name + strlen(object_name);
 
     set_camera_config_base_path("/etc/botui/channels");
 
@@ -58,13 +64,54 @@ namespace rvcs {
     alloff();
   }
 
-  bool rvcs_should_run_loop(int ctrl_state) {
+  bool   transitioning = true;
+  double transition_time = 0.0;
+  int    transition_ms = -1;
+
+  bool rvcs_should_run_loop(int ctrl_state, int loop_num) {
+
+    log("loop_compute_time", seconds() - loop_start_time);
+
+    loop_start_time = seconds();
+
+    if ((transitioning = (ctrl_state != last_ctrl_state))) {
+      transition_time = loop_start_time;
+      transition_ms   = -1;
+    }
+
+    last_ctrl_state = ctrl_state;
+
+    log("__________________________________a", 0);
+    log("loop_num", loop_num);
+    log("loop_start_time", loop_start_time);
+
     if (state_to_run == -1) { return true; }
 
     if (state_to_stop == -1 && state_to_run != ctrl_state) { return false; }
     if (state_to_stop == ctrl_state) { return false; }
 
     return true;
+  }
+
+  bool rvcs_transitioning_to_this_state() {
+    return transitioning;
+  }
+
+  double time_since_transition() {
+    return seconds() - transition_time;
+  }
+
+  int ms_since_transition(int ms1, int ms2, int ms3, int ms4, int ms5) {
+    int time = (int)(time_since_transition() * 1000);
+
+    if (time >= ms1 && transition_ms != ms1) { return ms1; }
+    if (time >= ms2 && transition_ms != ms2 && ms2 != -1) { return ms2; }
+    if (time >= ms3 && transition_ms != ms3 && ms3 != -1) { return ms3; }
+    if (time >= ms4 && transition_ms != ms4 && ms4 != -1) { return ms4; }
+    if (time >= ms5 && transition_ms != ms5 && ms5 != -1) { return ms5; }
+
+    /* otherwise */
+    return 1000000;
   }
 
   void move(int left, int right) {
@@ -160,9 +207,17 @@ namespace rvcs {
     printf("%s: x:%d y:%d w:%d h:%d\n", var_name, value.ulx, value.uly, value.width, value.height);
   }
 
+  static char * suffixed(char const * suffix) {
+    *object_suffix = 0;
+    if (suffix == NULL) { return object_name; }
+
+    strcpy(object_suffix, suffix);
+    return object_name;
+  }
+
   static Blob theNullBlob(false);
 
-  BlobList filter_skininess(BlobList const & list, float lt, float gt, BlobList * premoved) {
+  BlobList filter_skininess(BlobList const & list, float lt, float gt, BlobList * premoved, char const * suffix) {
     BlobList result;
 
     if (premoved) {
@@ -180,10 +235,12 @@ namespace rvcs {
       }
     }
 
+    log(premoved, suffixed(suffix), "removed_skinny_objects");
+
     return result;
   }
 
-  BlobList filter_area(BlobList const & list, int lt, int gt, BlobList * premoved) {
+  BlobList filter_area(BlobList const & list, int lt, int gt, BlobList * premoved, char const * suffix) {
     BlobList result;
 
     if (premoved) {
@@ -201,10 +258,12 @@ namespace rvcs {
       }
     }
 
+    log(premoved, suffixed(suffix), "removed_small_objects");
+
     return result;
   }
 
-  BlobList filter_x(BlobList const & list, int lt, int gt, BlobList * premoved) {
+  BlobList filter_x(BlobList const & list, int lt, int gt, BlobList * premoved, char const * suffix) {
     BlobList result;
 
     if (premoved) {
@@ -222,10 +281,12 @@ namespace rvcs {
       }
     }
 
+    log(premoved, suffixed(suffix), "removed_hrange");
+
     return result;
   }
 
-  BlobList filter_y(BlobList const & list, int lt, int gt, BlobList * premoved) {
+  BlobList filter_y(BlobList const & list, int lt, int gt, BlobList * premoved, char const * suffix) {
     BlobList result;
 
     if (premoved) {
@@ -243,10 +304,12 @@ namespace rvcs {
       }
     }
 
+    log(premoved, suffixed(suffix), "removed_vrange");
+
     return result;
   }
 
-  BlobList filter_doesnt_contain(BlobList const & list, struct point2 const & pt, BlobList * premoved) {
+  BlobList filter_doesnt_contain(BlobList const & list, struct point2 const & pt, BlobList * premoved, char const * suffix) {
     BlobList result;
 
     if (premoved) {
@@ -264,7 +327,21 @@ namespace rvcs {
       }
     }
 
+    log(premoved, suffixed(suffix), "removed_hit_test");
+
     return result;
+  }
+
+  BlobList zero_scores(BlobList const & list) {
+    BlobList result;
+
+    for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
+      Blob new_blob = *blob;
+      new_blob->score = 0.0;
+      result.push_back(new_blob);
+    }
+
+    return reorder_by_score(result);
   }
 
   BlobList score_by_x(BlobList const & list) {
@@ -272,7 +349,7 @@ namespace rvcs {
 
     for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
       Blob new_blob = *blob;
-      new_blob.score = (float)new_blob.center.x;
+      new_blob.score += (float)new_blob.center.x;
       result.push_back(new_blob);
     }
 
@@ -284,7 +361,31 @@ namespace rvcs {
 
     for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
       Blob new_blob = *blob;
-      new_blob.score = -1 * (float)new_blob.center.x;
+      new_blob.score += -1 * (float)new_blob.center.x;
+      result.push_back(new_blob);
+    }
+
+    return reorder_by_score(result);
+  }
+
+  BlobList score_by_skininess(BlobList const & list, float factor) {
+    BlobList result;
+
+    for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
+      Blob new_blob = *blob;
+      new_blob->score += (10.0 - new_blob->skininess()) * factor;
+      result.push_back(new_blob);
+    }
+
+    return reorder_by_score(result);
+  }
+
+  BlobList score_by_x0(BlobList const & list, float factor) {
+    BlobList result;
+
+    for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
+      Blob new_blob = *blob;
+      new_blob->score += (10.0 - abs((float)new_blob->center.x / 12.0)) * factor;
       result.push_back(new_blob);
     }
 
@@ -364,6 +465,11 @@ namespace rvcs {
     }
 
     return result;
+  }
+
+  void log(BlobList const * list, char const * item_msg, char const * msg) {
+    if (list == NULL) { return; }
+    log(*list, item_msg, msg);
   }
 
   void log(BlobList const & list, char const * item_msg, char const * msg) {

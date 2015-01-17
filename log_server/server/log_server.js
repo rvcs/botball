@@ -84,7 +84,7 @@ var server = net.createServer(function(c) {
           }
         } else if (/^servo_/i.exec(name)) {
           mkkeyvP(data, currLoopNum, name, value);
-        } else if (name in {'loop_start_time':true, 'ctrl_state':true, 'loop_compute_time':true}) {
+        } else if (name in {'loop_start_time':true, 'ctrl_state':true, 'loop_compute_time':true, 'motor':true}) {
           mkkeyvP(data, currLoopNum, name, value);
         }
 
