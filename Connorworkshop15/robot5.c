@@ -9,6 +9,7 @@ int main()
 	printf("Hello, World!\n");
 	msleep(2500);
 	printf("Botguy\n");
+	set_servo_position(3, 1000)
 	forward(100, 500);
 	right(100, 500);
 	forward(100, 500);
