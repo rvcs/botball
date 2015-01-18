@@ -4,23 +4,34 @@ void turn_right(int power);
 void driveand_turnright(int power);
 int main()
 {
-	printf("Hello, World!3\n");
+	camera_open();
+	printf("Hello, World!5 %d\n", digital(8));
 	while (digital(8) !=1)
 	{
-		printf("%d\n", analog_et(5));
-		if (analog_et(5)<350)
+		printf("D8-- %d\n", digital(8));
+		camera_update();
+		printf("c: %d\n",get_object_count(0));
+		
+		if (get_object_count(0)==0)
 		{
-			drive_forward(100);
+			ao();
 		}
-		else if(analog_et(5)>450)
+		else if(get_object_center_x(0,0)<80)
 		{
-			drive_forward(-99);
+			motor(0, -50);
+			printf("%d\n",get_object_center_x(0,0));
+			motor(3, 50);
 		}
 		else
 		{
+			motor(0, 50);
+			printf("%d\n",get_object_center_x(0,0));
+			motor(3, -50);
 		}
 	}
+	printf("Done\n");
 	ao();
+	camera_close();
 	return 0;
 }
 //end of main function
