@@ -4,32 +4,21 @@ void turn_right(int power);
 void driveand_turnright(int power);
 int main()
 {
-	printf("Hello, World!\n");
-	msleep(2500);
-	printf("jordan\n");
-	
-	
-	enable_servos();
-	set_servo_position(0, 822);
-	msleep(3000);	
-	set_servo_position(0,1665);
-	
-	msleep(3000);
-	set_servo_position(0, 822);
-	msleep(3000);	
-	set_servo_position(0,1665);
-	msleep(3000);
-	disable_servos();
-	
-	return 0;
-	driveand_turnright(80);
-	
-	driveand_turnright(80);
-	
-	driveand_turnright(80);
-	
-	driveand_turnright(80);
-
+	printf("Hello, World!3\n");
+	while (digital(8) !=1)
+	{
+		printf("%d\n", analog(1));
+		if (analog(1)>600)
+		{
+			motor(0,10);
+			motor(3,100);
+		}
+		else
+		{
+			motor(0,100);
+			motor(3,10);
+		}
+	}
 	ao();
 	return 0;
 }
