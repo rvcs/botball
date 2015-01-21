@@ -6,14 +6,16 @@
 
 #include <deque>
 
-namespace rvcs {
-  int  start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState);
-  int  die(char const * msg = NULL);
+  int  rvcs_start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState);
+  int  rvcs_die(char const * msg = NULL);
+  void rvcs_end();
 
   bool   rvcs_should_run_loop(int ctrl_state, int loop_num);
   bool   rvcs_transitioning_to_this_state();
   double time_since_transition();
   int    ms_since_transition(int ms1, int ms2 = -1, int ms3 = -1, int ms4 = -1, int ms5 = -1);
+
+  int    get_motor_distance(int m);
 
   int               rvcs_camera_update();
   struct rectangle  rvcs_object_bbox(int channel, int obj_id);
@@ -24,6 +26,7 @@ namespace rvcs {
 
   void rvcs_set_servo(int servo_num, int pos);
 
+namespace rvcs {
   void log(char const * var_name, double value);
   void log(char const * var_name, int value, char const * comment = NULL);
   void log(char const * format, char const * var_name, int a, int b);
@@ -31,10 +34,9 @@ namespace rvcs {
   void log(char const * var_name, bool value);
   void log(char const * var_name, struct rectangle const & value);
   void log(char const * var_name, struct point2 const & value);
+};
 
   double time_since(double const & other);
-
-  void end();
   
   struct Blob {
     struct rectangle  rect;
@@ -72,13 +74,14 @@ namespace rvcs {
   BlobList zero_scores(BlobList const & list);
   BlobList score_by_x(BlobList const & list);
   BlobList score_by_nx(BlobList const & list);
+  BlobList score_by_skininess(BlobList const & list, float factor);
+  BlobList score_by_x0(BlobList const & list, float factor);
 
   BlobList first(BlobList const & list, int count = 1, BlobList * premoved = NULL);
 
   Blob const & head(BlobList const & list);
 
   BlobList reorder_by_score(BlobList const & list);
-};
 
 
 #endif

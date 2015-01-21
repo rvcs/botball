@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
   event_time = end_of_time;
 
   // Startup
-  ctrl_state = (e_ctrl_state)rvcs::start(argc, argv, /*arm*/ 1300, /*finger*/ 500, 0, /*eye*/ 600, (int)ctrl_state);
+  ctrl_state = (e_ctrl_state)rvcs_start(argc, argv, /*arm*/ 1300, /*finger*/ 500, 0, /*eye*/ 600, (int)ctrl_state);
 
   // The main loop
   int eye_pos = 0, eye_pos_max = 100000, eye_pos_min = -100000;
@@ -306,6 +306,10 @@ int main(int argc, char *argv[])
       break;
 
     case ctrl_state_backup_from_orange_cube:
+      if (get_motor_distance(0) < 1100) {
+        move(-100, -100);
+      }
+
       switch (ms_since_transition(0, 700, 1400)) {
       case 0:
         move_mode = move_mode_backup;
@@ -453,7 +457,10 @@ int main(int argc, char *argv[])
     } else if (move_mode == move_mode_forward) {
       left_power = right_power = 70;
     }
-    move(left_power, right_power);
+    
+    if (move_mode != move_mode_none) {
+      move(left_power, right_power);
+    }
 
     if (arm_mode == arm_mode_down) {
       rvcs_set_servo(0, 1300);
@@ -477,7 +484,7 @@ int main(int argc, char *argv[])
     //if (loop_num > 10) { break; }
   }
 
-  rvcs::end();
+  rvcs_end();
 	return 0;
 }
 
@@ -518,7 +525,7 @@ char const * to_name(e_ctrl_state enu) {
     case ctrl_state_backup_from_orange_cube:                    return "ctrl_state_backup_from_orange_cube"; break;
     case ctrl_state_start_moving_across_board:                  return "ctrl_state_start_moving_across_board"; break;
     case ctrl_state_point_at_cylinder:                          return "ctrl_state_point_at_cylinder"; break;
-    case ctrl_state_approach_cylinde:                           return "ctrl_state_approach_cylinde"; break;
+    case ctrl_state_approach_cylinder:                          return "ctrl_state_approach_cylinder"; break;
     case ctrl_state_drop:                                       return "ctrl_state_drop"; break;
     case ctrl_state_spin_to_find_left_orange:                   return "ctrl_state_spin_to_find_left_orange"; break;
     case ctrl_state_rotate_to_find_orange_perpend_sans_yellow:  return "ctrl_state_rotate_to_find_orange_perpend_sans_yellow"; break;

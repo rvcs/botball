@@ -7,10 +7,15 @@
 #include <stdlib.h>
 
 using std::string;
+using namespace rvcs;
+using rvcs::log;
+//using rvcs::rvcs_object_bbox;
+//using rvcs::rvcs_object_center;
+//using rvcs::rvcs_object_centroid;
 
 char* itoa(int num, char* str, int base);
 
-namespace rvcs {
+//namespace rvcs {
   int state_to_run = -1, state_to_stop = -1, last_ctrl_state = -1;
   double loop_start_time = 0.0;
   static char object_name[64];
@@ -21,7 +26,7 @@ namespace rvcs {
 
   int cam_height = 0, cam_width = 0, half_cam_height = 0, half_cam_width = 0;
 
-  int start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState) {
+  int rvcs_start(int argc, char * argv[], int s0_pos, int s1_pos, int s2_pos, int s3_pos, int defState) {
     int result = 1;
     int state = defState;
 
@@ -41,10 +46,10 @@ namespace rvcs {
     set_camera_config_base_path("/etc/botui/channels");
 
     result = result && camera_open();
-    if (!result) { die("camera_open() failed"); }
+    if (!result) { rvcs_die("camera_open() failed"); }
 
     result = result && camera_load_config("orange");
-    if (!result) { die("camera_load_config failed"); }
+    if (!result) { rvcs_die("camera_load_config failed"); }
 
     set_servo_position(0, s0_pos);
     set_servo_position(1, s1_pos);
@@ -57,7 +62,7 @@ namespace rvcs {
     return state;
   }
 
-  void end() {
+  void rvcs_end() {
     log("==END==", -999);
     camera_close();
     disable_servos();
@@ -77,6 +82,11 @@ namespace rvcs {
     if ((transitioning = (ctrl_state != last_ctrl_state))) {
       transition_time = loop_start_time;
       transition_ms   = -1;
+      
+      clear_motor_position_counter(0);
+      clear_motor_position_counter(1);
+      clear_motor_position_counter(2);
+      clear_motor_position_counter(3);
     }
 
     last_ctrl_state = ctrl_state;
@@ -114,6 +124,14 @@ namespace rvcs {
     return 1000000;
   }
 
+  int get_motor_distance(int m)
+  {
+    int result = get_motor_position_counter(m);
+    if (result < 0) { return -result; }
+    return result;
+  }
+  
+ 
   void move(int left, int right) {
     motor(0, left);
     motor(1, right);
@@ -160,7 +178,7 @@ namespace rvcs {
     return result;
   }
 
-  int die(char const * msg_) {
+  int rvcs_die(char const * msg_) {
     char const * msg = msg_ ? msg_ : "";
     printf("Dying: %s\n", msg);
     exit(2);
@@ -171,11 +189,11 @@ namespace rvcs {
     return seconds() - other;
   }
 
-  void log(char const * var_name, double value) {
+  void rvcs::log(char const * var_name, double value) {
     printf("%s: %lf\n", var_name, value);
   }
 
-  void log(char const * var_name, int value, char const * comment) {
+  void rvcs::log(char const * var_name, int value, char const * comment) {
     if (comment) {
       printf("%s: %d; --%s\n", var_name, value, comment);
     } else {
@@ -183,7 +201,7 @@ namespace rvcs {
     }
   }
 
-  void log(char const * var_name, int which, int value, char const * comment) {
+  void rvcs::log(char const * var_name, int which, int value, char const * comment) {
     char buf[32];
     string name(var_name);
     name += "_";
@@ -191,19 +209,19 @@ namespace rvcs {
     log(name.c_str(), value, comment);
   }
 
-  void log(char const * format, char const * var_name, int a, int b) {
+  void rvcs::log(char const * format, char const * var_name, int a, int b) {
     printf(format, var_name, a, b);
   }
   
-  void log(char const * var_name, bool value) {
+  void rvcs::log(char const * var_name, bool value) {
     printf("%s: %s\n", var_name, value ? "1" : "0");
   }
 
-  void log(char const * var_name, struct point2 const & value) {
+  void rvcs::log(char const * var_name, struct point2 const & value) {
     printf("%s: x:%d y:%d\n", var_name, value.x, value.y);
   }
 
-  void log(char const * var_name, struct rectangle const & value) {
+  void rvcs::log(char const * var_name, struct rectangle const & value) {
     printf("%s: x:%d y:%d w:%d h:%d\n", var_name, value.ulx, value.uly, value.width, value.height);
   }
 
@@ -215,6 +233,9 @@ namespace rvcs {
     return object_name;
   }
 
+//  using rvcs::Blob;
+//  using rvcs::BlobList;
+  
   static Blob theNullBlob(false);
 
   BlobList filter_skininess(BlobList const & list, float lt, float gt, BlobList * premoved, char const * suffix) {
@@ -337,7 +358,7 @@ namespace rvcs {
 
     for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
       Blob new_blob = *blob;
-      new_blob->score = 0.0;
+      new_blob.score = 0.0;
       result.push_back(new_blob);
     }
 
@@ -373,7 +394,7 @@ namespace rvcs {
 
     for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
       Blob new_blob = *blob;
-      new_blob->score += (10.0 - new_blob->skininess()) * factor;
+      new_blob.score += (10.0 - new_blob.skininess()) * factor;
       result.push_back(new_blob);
     }
 
@@ -385,7 +406,7 @@ namespace rvcs {
 
     for (BlobList::const_iterator blob = list.begin(); blob != list.end(); ++blob) {
       Blob new_blob = *blob;
-      new_blob->score += (10.0 - abs((float)new_blob->center.x / 12.0)) * factor;
+      new_blob.score += (10.0 - abs((float)new_blob.center.x / 12.0)) * factor;
       result.push_back(new_blob);
     }
 
@@ -610,7 +631,7 @@ namespace rvcs {
   int norm_y(int y) {
     return half_cam_height - y;
   }
-};
+//};
 
 static void swap(char * pa, char * pb) {
   char temp = *pa;
