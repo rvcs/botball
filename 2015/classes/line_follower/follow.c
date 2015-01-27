@@ -22,9 +22,9 @@ int main()
 		
 		if (blackness > max_blackness) { max_blackness = blackness; }
 		if (blackness < min_blackness) { min_blackness = blackness; }
-		printf("%d (%d - %d)\n", blackness, min_blackness, max_blackness);
+		printf("%d (%d - %d - %d)\n", blackness, min_blackness, max_blackness, (min_blackness + max_blackness) / 2);
 		
-		if (blackness > 512) {
+		if (blackness > (min_blackness + max_blackness) / 2) {
 			move(10, 100);
 		} else {
 			move(100, 10);
