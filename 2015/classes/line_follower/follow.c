@@ -14,9 +14,16 @@ int main()
 	printf("Hello, World!\n");
 	double stop_time = seconds() + 8.0;
 		
+	int max_blackness = -1;
+	int min_blackness = 1024;
+		
 	do {
 		int blackness = fuzzy(6);
-		printf("%d\n", blackness);
+		
+		if (blackness > max_blackness) { max_blackness = blackness; }
+		if (blackness < min_blackness) { min_blackness = blackness; }
+		printf("%d (%d - %d)\n", blackness, min_blackness, max_blackness);
+		
 		if (blackness > 512) {
 			move(10, 100);
 		} else {
