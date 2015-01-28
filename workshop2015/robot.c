@@ -8,7 +8,17 @@ int main()
 	while (digital(8) !=1)
 	{
 		printf("%d\n", analog(1));
-		if (analog(1)>600)
+		if (analog(1)>860)
+		{
+			motor(0,0);
+			motor(3,100);
+		}
+		else if(analog(1)<400)
+		{
+			motor(0,100);
+			motor(3,0);
+		}
+		else if(analog(1)>515)
 		{
 			motor(0,10);
 			motor(3,100);
