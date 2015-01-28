@@ -121,12 +121,11 @@ e_move_mode   move_mode   = move_mode_none;
 e_arm_mode    arm_mode    = arm_mode_none;
 e_finger_mode finger_mode = finger_mode_none;
 
-double event_time = 0.0, transition_time = 0.0;
+double event_time = 0.0;
 int main(int argc, char *argv[])
 {
   int ms = -1;
   double start_time = seconds(), end_of_time = seconds() + 3600.0;
-  transition_time = start_time;
   event_time = end_of_time;
 
   // Startup
@@ -623,6 +622,3 @@ double time_since_event() {
   return seconds() - event_time;
 }
 
-double time_since_transition() {
-  return seconds() - transition_time;
-}
