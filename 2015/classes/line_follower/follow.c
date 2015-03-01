@@ -12,7 +12,7 @@ int fuzzy(int port);
 int main()
 {
 	printf("Hello, World!\n");
-	double stop_time = seconds() + 8.0;
+	double stop_time = seconds() + 32.0;
 		
 	int max_blackness = -1;
 	int min_blackness = 1024;
@@ -31,6 +31,7 @@ int main()
 		}
 	} while (seconds() < stop_time);
 	
+	ao();
 	printf("Done\n");
 	return 0;
 }
