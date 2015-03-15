@@ -25,12 +25,14 @@ int main()
 	set_servo_position(1,600);
 	stop();
 	msleep(1000);
+	// This is the part after it has supopsetly grabed the boxes.
+	set_servo_position(0, 491);
 	
 	go (50,50);
 	msleep (4900);
+	//It has now  found its way to the mesa.
 	
 	stop ();
-	set_servo_position(0, 498);
 	msleep(2500);
 	
 	go (70, 40);
@@ -48,6 +50,7 @@ int main()
 	
 	stop ();
 	set_servo_position(1, 1);
+	// It should have droped the boxes.
 	
 	go (-40, -40);
 	
