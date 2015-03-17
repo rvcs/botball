@@ -12,7 +12,7 @@ int main()
 	enable_servos();
 	printf("Houston we have ignition\n");
 	
-	set_servo_position(0, 950);
+	set_servo_position(0, 1050);
 	set_servo_position(1, 60);
 	
 	msleep (1000);
@@ -25,40 +25,37 @@ int main()
 	
 	msleep(2000);
 	
-	go(40, 0);
-	msleep(3000);
+	go(40, 40);
+	msleep(1000);
 	stop();
 		
 	set_servo_position(0, 1350);
 	msleep(1000);
-	set_servo_position(1, 1400);
+	set_servo_position(1, 960);
 	msleep(1000);
 		
-	set_servo_position(0,600);
+	set_servo_position(0,370);
 	stop();
 	msleep(1000);
 	
 	go (50,50);
-	msleep (4900);
+	msleep (4700);
 	
 	stop ();
-	set_servo_position(0, 498);
-	msleep(2500);
 	
 	go (70, 40);
 	
-	msleep(2600);
+	msleep(2200);
 	stop ();
 	
 	go (35, -30);
 	
-	msleep(1000);
+	msleep(500);
 	
-	go (15, 15);
 	
-	msleep(1500);
 	
 	stop ();
+	msleep(1000);
 	set_servo_position(1, 600);
 	
 	go (-40, -40);
@@ -66,16 +63,9 @@ int main()
 	msleep(4000);
 	stop();
 	
-	go (-35, 30);
+	set_servo_position(0, 1000);
 	
-	msleep(1650);
-	stop();
-	
-	go (40, 40);
-	
-	msleep (1950);
-	
-	set_servo_position(1, 600);
+	msleep(1000);
 	
 	return 0;
 }
