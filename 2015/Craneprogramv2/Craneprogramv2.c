@@ -17,33 +17,31 @@ int main()
 	
 	msleep (1000);
 	
-	while (analog(0) > 700 && a_button() == 0)
-		{
-			msleep(10);
-		}
-		shut_down_in(118.0);
+	wait_for_light(0); 
+
+	shut_down_in(119); 
 	
-	msleep(2000);
-	
+	msleep(8000);
+	//8 second delay after the lights to turn on to wait until the bots get out of the way
 	go(40, 40);
-	msleep(1000);
+	msleep(1300);
 	stop();
 		
 	set_servo_position(0, 1350);
 	msleep(1000);
-	set_servo_position(1, 960);
+	set_servo_position(1, 980);
 	msleep(1000);
-		
+	//grabs cubes
 	set_servo_position(0,370);
 	stop();
 	msleep(1000);
 	
-	go (50,50);
-	msleep (4700);
+	go (55,50);
+	msleep (4600);
 	
 	stop ();
 	
-	go (70, 40);
+	go (70, 35);
 	
 	msleep(2200);
 	stop ();
@@ -57,16 +55,38 @@ int main()
 	stop ();
 	msleep(1000);
 	set_servo_position(1, 600);
-	
+	//drops cubes
 	go (-40, -40);
 	
 	msleep(4000);
 	stop();
+	//starts going for cube/botguy
+	go (-30, 20);
+	msleep(1000);
+	stop();
 	
+	go (20, 20);
+	msleep(2700);
+	stop();
+	
+	set_servo_position(1, 1350);
+	msleep(500);
+	
+	go (-30, -40);
+	
+	msleep(8000);
+	stop();
+	//backs up into the starting zone
+	go (30, -30);
+	msleep(1500);
+	stop();
 	set_servo_position(0, 1000);
 	
-	msleep(1000);
-	
+	msleep(500);
+	stop();
+	set_servo_position(1, 300);
+	msleep(1200);
+	//dunks thingy on the scoring zone like a baws
 	return 0;
 }
 
