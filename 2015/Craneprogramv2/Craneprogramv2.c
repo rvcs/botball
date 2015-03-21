@@ -1,4 +1,7 @@
-// Created on Sat March 7
+
+// Created on Sat March 
+// Claw is servo 1 
+// the arm is servo 0
 
 #define RIGHT_MOTOR 1
 #define LEFT_MOTOR 0
@@ -29,10 +32,10 @@ int main()
 		
 	set_servo_position(0, 1350);
 	msleep(1000);
-	set_servo_position(1, 980);
+	set_servo_position(1, 1330);
 	msleep(1000);
 	//grabs cubes
-	set_servo_position(0,370);
+	set_servo_position(0, 370);
 	stop();
 	msleep(1000);
 	
@@ -41,14 +44,14 @@ int main()
 	
 	stop ();
 	
-	go (70, 35);
+	go (60, 35);
 	
-	msleep(2200);
+	msleep(1800);
 	stop ();
 	
 	go (35, -30);
 	
-	msleep(500);
+	msleep(1000);
 	
 	
 	
@@ -62,14 +65,14 @@ int main()
 	stop();
 	//starts going for cube/botguy
 	go (-30, 20);
-	msleep(1000);
+	msleep(1400);
 	stop();
 	
 	go (20, 20);
-	msleep(2700);
+	msleep(3100);
 	stop();
 	
-	set_servo_position(1, 1350);
+	set_servo_position(1, 1550);
 	msleep(500);
 	
 	go (-30, -40);
@@ -86,7 +89,7 @@ int main()
 	stop();
 	set_servo_position(1, 300);
 	msleep(1200);
-	//dunks thingy on the scoring zone like a baws
+	//dunks botgal on the scoring zone like a baws 
 	return 0;
 }
 
