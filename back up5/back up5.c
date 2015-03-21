@@ -2,8 +2,8 @@
 #if 1
 #define ARM_DOWN    470
 #define ARM_DOWNISH 550
-#define ARM_UP_PEG  1600
-#define ARM_UP	    1865
+#define ARM_UP_PEG  1706
+#define ARM_UP	    1977
 
 #else
 #define ARM_DOWN    450
@@ -58,7 +58,7 @@ int main()
 //goto	GO_DOWN_CAVE;
 	
 	
-//	wait_for_light(2); // change the port number to match where your robot 
+	wait_for_light(2); // change the port number to match where your robot 
 
 	shut_down_in(119); // shut off the motors and stop the Create after 119 seconds
 	// note that shut_down_in should immediately follow wait_for_light!!
@@ -73,12 +73,12 @@ int main()
 //turn on robot	
 	motor(0,-700);
 	motor(2,-700);
-	msleep(1000);
-#if 1
+	msleep(700);
+#if 0
 //go forward	
 	motor(0,400);
 	motor(2,400);
-	msleep(600);
+	msleep(1000);
 //turn to aline 
 	motor(0, -100);
 	motor(2, 100);
@@ -111,14 +111,15 @@ int main()
 	motor(2,85);
 	//msleep(6000);
 	printf("before 3000 delay\n");
-	msleep (3000);
+	msleep (2600);
 	set_servo_position(3, ARM_UP_PEG);
 	printf("after 3000 delay\n");
+	msleep(400);
 	printf("%d\n",analog(1));
 	start=seconds ();
 
 	while ((a1 = analog(1)) <500) {
-		printf("%d\n",a1);
+	//	printf("%d\n",a1);
 		//msleep(5);
 		if(seconds()-start>3.5){
 		printf("time_out\n");
@@ -132,14 +133,14 @@ int main()
 	
 		
 //go forward	
-	motor(0,85);
-	motor(2,85);
+	motor(0,60);
+	motor(2,60);
 	printf("go forward\n");
 	//msleep(2000);
 	while ((a1 = analog(1)) <600 || (a2 = analog(3)) <600) {
-		printf("%4d %4d\n",a1, a2);
+	//	printf("%4d %4d\n",a1, a2);
 		//msleep(5);
-		if (seconds()-start >8.5) {
+		if (seconds()-start >10.5) {
 			break;
 		}
 	}
@@ -161,7 +162,7 @@ int main()
 	//line follow
 	start=seconds ();
 	while(1){
-		if(seconds()-start>4.7){
+		if(seconds()-start>4.9){
 			break;
 		}
 		if (analog(1)>500) {
@@ -183,17 +184,19 @@ int main()
 
 GO_DOWN_CAVE:	
 	go(0,0);
-	set_servo_position(3, ARM_DOWNISH);	
+	set_servo_position(3, ARM_DOWN);	
 	msleep(500);
 	
+	//begining of picking up poms
+	
 	go(75,75);
-	msleep(1250);
+	msleep(2500);
 	
 	go_for(-50,-90, 1000);		// back up/turn/pull pom-poms
 	
-	go_for(90, -90, 600);
+	go_for(90, -90, 500);
 	
-	go_for(-190, -90, 300);
+	go_for(-100, -90, 600);
 	
 	set_servo_position(3, ARM_UP);
 	
@@ -206,7 +209,7 @@ GO_DOWN_CAVE:
 	
 	go_for(100,100,1000);
 	
-	go(-20, -20);
+	go(-10, -10);
 	set_servo_position(3, ARM_DOWN);
 	msleep(100);
 	
@@ -222,13 +225,22 @@ GO_DOWN_CAVE:
 	set_servo_position(3, ARM_DOWN + 200);
 	msleep(100);	
 
-	set_servo_position(3, ARM_DOWN + 250);
-	msleep(100);	
+	//set_servo_position(3, ARM_DOWN + 250);
+	//msleep(100);	
 
-	set_servo_position(3, ARM_DOWN + 400);
-	msleep(100);
-	
+	//set_servo_position(3, ARM_DOWN + 400);
+	//msleep(100);
+	//push the poms over the top of the PVC
 	go_for(20, 20, 1000);
+	//StOp
+	go(0,0);
+    //wiggle the arm up and down so the poms fall off
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250); 
+	set_servo_position(3, ARM_DOWN+300);
+	msleep(250);
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250);
 	
 	// Raise the arm
 	set_servo_position(3, ARM_UP);
@@ -249,14 +261,14 @@ GO_DOWN_CAVE:
 			motor(0,80);
 			motor(2,50);
 		}else {
-			motor(0,80);
+			motor(0,80);   //why is this 60 and 80
 			motor(2,60);
 		}
 	}
 		//line follow
 	start=seconds ();
 	while(1){
-		if(seconds()-start>8.9){
+		if(seconds()-start>9.1){
 			break;
 		}
 		if (analog(1)>500) {
@@ -271,35 +283,155 @@ GO_DOWN_CAVE:
 		}
 	}
 	
-	set_servo_position(3,ARM_DOWNISH);
+	set_servo_position(3,ARM_DOWN);
+	go_for(100, 100, 3500);			// Ram into PVC at the end of the cave
 	
-	#if 1
+#if 1
+	go_for(-50, -90, 1000);		// Back up with poms
+	go_for(90, -90, 1000);
+	set_servo_position(3, ARM_DOWNISH);
+	
+	// TODO: Run back across the cave to the good end
 	start=seconds ();
 	while(1){
-		if(seconds()-start>6.0){
+		if(seconds()-start>1.5){
 			break;
 		}
 		if (analog(1)>500) {
-			motor(0,-80);
-			motor(2,-100);
+			motor(0,50);
+			motor(2,80);
 		}else if (analog(3)>500) {
-			motor(0,-100);
-			motor(2,-80);
+			motor(0,80);
+			motor(2,50);
 		}else {
-			motor(0,-100);
-			motor(2,-100);
+			motor(0,80);   //why is this 60 and 80
+			motor(2,60);
 		}
 	}
+	start=seconds ();
+	while(1){
+		if(seconds()-start>8){
+			break;
+		}
+		if (analog(1)>500) {
+			motor(0,80);
+			motor(2,100);
+		}else if (analog(3)>500) {
+			motor(0,100);
+			motor(2,80);
+		}else {
+			motor(0,100);
+			motor(2,100);
+		}
+	}
+	set_servo_position(3, ARM_DOWN);
+	go(75,75);
+	msleep(2500);
+	
+	go_for(-50,-90, 1000);		// back up/turn/pull pom-poms
+	
+	go_for(90, -90, 500);
+	
+	go_for(-100, -90, 600);
+	
+	set_servo_position(3, ARM_UP);
+	
+	go_for(100, 100, 2000);
+	
+	go_for(-100, -100,2000);
+	
+	set_servo_position(3, ARM_DOWN);
+	msleep(700);
+	
+	go_for(100,100,1000);
+	
+	go(-10, -10);
+	set_servo_position(3, ARM_DOWN);
+	msleep(100);
+	
+	set_servo_position(3, ARM_DOWN + 50);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 100);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 150);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 200);
+	msleep(100);	
+
+	//set_servo_position(3, ARM_DOWN + 250);
+	//msleep(100);	
+
+	//set_servo_position(3, ARM_DOWN + 400);
+	//msleep(100);
+	//push the poms over the top of the PVC
+	go_for(20, 20, 1000);
+	//StOp
+	go(0,0);
+    //wiggle the arm up and down so the poms fall off
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250); 
+	set_servo_position(3, ARM_DOWN+300);
+	msleep(250);
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250);
+	//backs up to push poms second time
+	set_servo_position(3, ARM_UP);
+	go_for(-100, -100,2000);
+//push poms second time
+	go_for(100, 100, 2000);
+	
+	go_for(-100, -100,2000);
+	
+	set_servo_position(3, ARM_DOWN);
+	msleep(700);
+	
+	go_for(100,100,1000);
+	
+	go(-10, -10);
+	set_servo_position(3, ARM_DOWN);
+	msleep(100);
+	
+	set_servo_position(3, ARM_DOWN + 50);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 100);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 150);
+	msleep(100);	
+
+	set_servo_position(3, ARM_DOWN + 200);
+	msleep(100);	
+
+	//set_servo_position(3, ARM_DOWN + 250);
+	//msleep(100);	
+
+	//set_servo_position(3, ARM_DOWN + 400);
+	//msleep(100);
+	//push the poms over the top of the PVC
+	go_for(20, 20, 1000);
+	//StOp
+	go(0,0);
+    //wiggle the arm up and down so the poms fall off
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250); 
+	set_servo_position(3, ARM_DOWN+300);
+	msleep(250);
+	set_servo_position(3, ARM_DOWN+350);
+	msleep(250);
 
 	//motor(0,-75);
 	//motor(2,-75);
 	//msleep(8500);
 	
-turn_left();
+//turn_left();
 	
-	go_for(100, 100, 1800);
-	turn_left();
-	go_for(100, 100, 5000);
+	//go_for(100, 100, 1800);
+	//turn_left();
+	//go_for(100, 100, 5000);
 	
 #endif 
 
