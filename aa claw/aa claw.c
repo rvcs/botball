@@ -29,7 +29,7 @@ int main()
 	msleep(12000);
 	//8 second delay after the lights to turn on to wait until the bots get out of the way
 	go(41, 41);
-	msleep(1000);
+	msleep(2250);
 	stop();
 		
 	set_servo_position(0, 1350);
@@ -42,7 +42,7 @@ int main()
 	msleep(1000);
 	
 	go (54,50);
-	msleep (4600);
+	msleep (3350);
 	
 	stop ();
 	
