@@ -42,7 +42,7 @@ int go(int left, int right)
 int go_for(int left,int right,int msec)
 {
 	go(left, right);
-	msleep(msec);
+	msleep(msec); 
 	return 1;
 }
 
@@ -57,7 +57,7 @@ int main()
 	
 //goto	GO_DOWN_CAVE;
 	
-#if 0
+	
 	wait_for_light(2); // change the port number to match where your robot 
 
 	shut_down_in(119); // shut off the motors and stop the Create after 119 seconds
@@ -65,7 +65,7 @@ int main()
 
 	printf("My program should score more points than this template!\n");
 	// replace printf above with your code
-#endif 
+
 	//create_disconnect();
 	// Created on Mon March 2 2015
 	int a1;
@@ -108,7 +108,7 @@ int main()
 	
 	  //go forwad 
 	motor(0,85);
-	motor(2,82);  //tweek if wheel goes sideways
+	motor(2,85);  //tweek if wheel goes sideways
 	//msleep(6000);
 	printf("before 3000 delay\n");
 	msleep (2600);
@@ -120,7 +120,8 @@ int main()
 
 	while ((a1 = analog(1)) <500) {
 	//	printf("%d\n",a1);
-		//msleep(5);
+		
+		msleep(1000);
 		if(seconds()-start>3.5){
 		printf("time_out\n");
 			break;
@@ -180,7 +181,7 @@ int main()
 	//motor(0,85);
 	//motor(2,85);
 	//msleep(5500);
-//put arm downto grab
+//put arm down to grab
 
 GO_DOWN_CAVE:	
 	go(0,0);
