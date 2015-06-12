@@ -22,7 +22,7 @@ int main()
 	
 	msleep (1000);
 	
-	wait_for_light(0); 
+	//wait_for_light(0); 
 
 	shut_down_in(119); 
 	
@@ -42,13 +42,13 @@ int main()
 	msleep(1000);
 	
 	go (54,50);
-	msleep (4600);
+	msleep (5000);
 	
 	stop ();
 	
 	go (60, 35);
 	
-	msleep(1600);
+	msleep(1900);
 	stop ();
 	
 	go (35, -30);
