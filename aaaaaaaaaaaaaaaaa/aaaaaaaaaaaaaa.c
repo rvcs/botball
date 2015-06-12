@@ -57,7 +57,7 @@ int main()
 	
 //goto	GO_DOWN_CAVE;
 	
-#if 0
+	
 	wait_for_light(2); // change the port number to match where your robot 
 
 	shut_down_in(119); // shut off the motors and stop the Create after 119 seconds
@@ -65,7 +65,7 @@ int main()
 
 	printf("My program should score more points than this template!\n");
 	// replace printf above with your code
-#endif 
+
 	//create_disconnect();
 	// Created on Mon March 2 2015
 	int a1;
@@ -108,7 +108,7 @@ int main()
 	
 	  //go forwad 
 	motor(0,85);
-	motor(2,82);  //tweek if wheel goes sideways
+	motor(2,80);  //tweek if wheel goes sideways
 	//msleep(6000);
 	printf("before 3000 delay\n");
 	msleep (2600);

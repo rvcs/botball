@@ -1,7 +1,7 @@
 // Created on Mon March 16 2015
 #if 1
 #define ARM_DOWN    470
-#define ARM_DOWNISH 550
+#define ARM_DOWNIS H 550
 #define ARM_UP_PEG  1706
 #define ARM_UP	    1977
 
@@ -57,7 +57,7 @@ int main()
 	
 //goto	GO_DOWN_CAVE;
 	
-#if 0
+	
 	wait_for_light(2); // change the port number to match where your robot 
 
 	shut_down_in(119); // shut off the motors and stop the Create after 119 seconds
@@ -65,7 +65,7 @@ int main()
 
 	printf("My program should score more points than this template!\n");
 	// replace printf above with your code
-#endif 
+
 	//create_disconnect();
 	// Created on Mon March 2 2015
 	int a1;
@@ -108,7 +108,7 @@ int main()
 	
 	  //go forwad 
 	motor(0,85);
-	motor(2,82);  //tweek if wheel goes sideways
+	motor(2,85);
 	//msleep(6000);
 	printf("before 3000 delay\n");
 	msleep (2600);
@@ -310,7 +310,7 @@ GO_DOWN_CAVE:
 	}
 	start=seconds ();
 	while(1){
-		if(seconds()-start>8.5){ // change from 8 sec
+		if(seconds()-start>8){
 			break;
 		}
 		if (analog(1)>500) {
