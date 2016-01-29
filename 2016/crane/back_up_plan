@@ -1,0 +1,45 @@
+// Created on Wed January 27 2016
+//The plan is to send the Claw onto the opponents side.
+
+//0 is the left motor. 1 is the right motor.
+//in the stimulator 0 is the left motor and 2 is the right motor.
+void stop()
+{
+	motor(0,0);
+	motor(2,0);
+}
+
+int main()
+{
+	printf("Hello, World!\n");
+	motor(2,100);
+	motor(0,100);
+	msleep(3000);
+	stop();
+	motor(0,40);
+	msleep(885);
+	stop();
+	motor(0,100);
+	motor(2,100);
+	msleep(500);
+	stop();
+	motor(0,40);
+	msleep(885);
+	stop();
+	motor(0,100);
+	motor(2,100);
+	msleep(1200);
+	stop();
+	motor(0,80);
+	msleep(885);
+	stop();
+	motor(0,100);
+	motor(2,100);
+	msleep(750);
+	stop();
+	motor(0,80);
+	msleep(885);
+	stop();
+	
+	return 0;
+}
