@@ -1,0 +1,48 @@
+// Created on Wed January 27 2016
+//The plan is to send the Claw onto the opponents side.
+
+//0 is the left motor. 1 is the right motor.
+//in the stimulator 0 is the left motor and 2 is the right motor.
+void stop()
+{
+	motor(0,0);
+	motor(1,0);
+}
+
+
+int main()
+{
+	enable_servos();
+	printf("Hello, World!\n");
+	set_servo_position(0, 1175);
+	motor(1,100);//going forward
+	motor(0,100);
+	msleep(6000);
+	stop();
+	motor(0,100);//45 degree turn.
+	msleep(1000);
+	stop();
+	motor(0,100);
+	motor(1,100);
+	msleep(1500);
+	stop();
+	motor(0,100);
+	msleep(1500);//45 degree turn.
+	stop();
+	motor(0,100);
+	motor(1,100);
+	msleep(2000);
+	stop();
+	motor(0,100);
+	msleep(1600);
+	stop();
+	motor(0,100);
+	motor(1,100);
+	msleep(750);
+	stop();
+	motor(1,100);
+	msleep(1600);
+	stop();
+	ao();
+	return 0;
+}
