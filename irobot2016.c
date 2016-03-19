@@ -1,7 +1,11 @@
 
-#define SPIN 157
-#define FORWARD 145
-#define DISTANCE 156
+
+//#define SPIN 157
+//#define FORWARD 145
+#define ARC 	137
+#define DRIVE 	145
+#define WAIT 	156
+//#define DISTANCE 156
 char opcodes[1024];
 char * opcodes_tail = NULL; //creates system to avoid having to count bytes
 
@@ -19,15 +23,15 @@ int num_bytes()
 int main()
 {
 	int i = 0;
-	short distance1 = -560; 
-	short distance2 = -405;
-	short distance3 = -470;
-	short distance4 = 460;
-	short distance5 = 1580;
-	short speed1 = -500; //Variable 'speed' equal to value
-	short speed2 = 500;
-	short speed3 = 100;
-	short angle1 = 70;
+	short distance1 = -1500; 
+	short distance2 = -400;
+	short distance3 = -1530;
+	short distance4 = -460;
+	short distance5 = -1450;
+	short distance6 = -100;
+	short speed1 = -100; //Variable 'speed' equal to value
+	short speed2 = -100;
+	short angle1 = -70;
 	short angle2 = -60;
 	short angle3 = -20;
 	short angle4 = -175;
@@ -45,87 +49,103 @@ int main()
 	write_byte(7); //right bumb 1 byte
 	
 //movement begins
-	write_byte(FORWARD); //go forward mm/s
+	write_byte(DRIVE); //go forward mm/s
 	write_byte(speed1>>8); 
 	write_byte(speed1&0xff); 
-
-	write_byte(DISTANCE); //count distance for [distance1]
+	write_byte(speed1>>8); 
+	write_byte(speed1&0xff);	
+	
+	write_byte(WAIT);
 	write_byte(distance1>>8); 
 	write_byte(distance1&0xff);	
 	
-	write_byte(SPIN); //left
+	goto END;
+	
+	write_byte(ARC); //left
 	write_byte(angle1>>8);
 	write_byte(angle1&0xff);
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
 	
-	write_byte(FORWARD);
+	write_byte(DRIVE);
 	write_byte(speed1>>8);
 	write_byte(speed1&0xff); 
+	write_byte(speed1>>8); 
+	write_byte(speed1&0xff);
 
-	write_byte(DISTANCE); //count distance for [distance1]
+	write_byte(WAIT);
+	write_byte(distance2>>8);
+	write_byte(distance2&0xff);
+	
+	write_byte(ARC); //spin right
+	write_byte(angle2>>8);
+	write_byte(angle2&0xff);
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
+	
+	write_byte(DRIVE);
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff); 
 	write_byte(distance2>>8); 
 	write_byte(distance2&0xff);	
 	
-	write_byte(SPIN); //spin right
+	write_byte(WAIT);
+	write_byte(distance3>>8);
+	write_byte(distance3&0xff);
+
+	write_byte(ARC);//spin left
 	write_byte(angle3>>8);
 	write_byte(angle3&0xff);
-	
-	write_byte(FORWARD);
-	write_byte(speed1>>8);
-	write_byte(speed1&0xff); 
-
-	write_byte(DISTANCE); //count distance for [distance2]
-	write_byte(distance2>>8); 
-	write_byte(distance2&0xff);	
-
-	write_byte(SPIN);//spin left
-	write_byte(angle1>>8);
-	write_byte(angle1&0xff);
-	
-	write_byte(FORWARD); //go forward mm/s
 	write_byte(speed1>>8);
 	write_byte(speed1&0xff);
 	
-	write_byte(DISTANCE);//count distance1
-	write_byte(distance1>>8);
-	write_byte(distance1&0xff);
-	
-	write_byte(SPIN);//spin right
-	write_byte(angle1>>8);
-	write_byte(angle1&0xff);
-	
-	write_byte(FORWARD);//go foward mm/s
+	write_byte(DRIVE); //go forward mm/s
 	write_byte(speed1>>8);
 	write_byte(speed1&0xff);
+	write_byte(distance3>>8);
+	write_byte(distance3&0xff);
 	
-	write_byte(DISTANCE);//go distance
-	write_byte(distance1>>8);
-	write_byte(distance1&0xff);
-	
-	write_byte(SPIN);//spin right
+	write_byte(ARC);//spin right
 	write_byte(angle4>>8);
 	write_byte(angle4&0xff);
-	
-	write_byte(FORWARD);//go forward mm/s
 	write_byte(speed1>>8);
 	write_byte(speed1&0xff);
 	
-	write_byte(DISTANCE);//distance 
+	write_byte(DRIVE);//go foward mm/s
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
+	write_byte(distance4>>8);
+	write_byte(distance4&0xff);
+	
+	write_byte(ARC);//spin right
+	write_byte(angle5>>8);
+	write_byte(angle5&0xff);
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
+	
+	write_byte(DRIVE);//go forward mm/s
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
 	write_byte(distance5>>8);
 	write_byte(distance5&0xff);
 	
-	write_byte(SPIN);//spin right
-	write_byte(angle1>>8);
-	write_byte(angle1&0xff);
+	write_byte(ARC);//spin right
+	write_byte(angle5>>8);
+	write_byte(angle5&0xff);
+	write_byte(speed1>>8);
+	write_byte(speed1&0xff);
 	
-	write_byte(FORWARD);//go forward
+	write_byte(DRIVE);//go forward
 	write_byte(speed2>>8);
 	write_byte(speed2&0xff);
+	write_byte(distance6>>8);
+	write_byte(distance6&0xff);
 	
-	write_byte(DISTANCE);//distance
-	write_byte(distance1>>8);
-	write_byte(distance1&0xff);
+	END:
 	
 	write_byte(7); //reboot 1 byte
+	
+	printf("total bytes: %d\n", num_bytes());
 
 	msleep(500);
 	create_write_byte(152); //writes script
@@ -150,3 +170,4 @@ int main()
 	printf("Done\n");
 	
 }
+
