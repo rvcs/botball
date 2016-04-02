@@ -122,7 +122,7 @@ int main()
 	printf("%d\n",analog(1));
 	
 
-	while ((a1 = analog(1)) <500 && (a2 = analog(3)) <500) {
+	while ((a1 = analog(1)) <500 && (a2 = analog(3)) <500) { 
 		printf("%5d %5d\n",a1,a2);
 		//msleep(5);
 		if(seconds()-start>6.5){
