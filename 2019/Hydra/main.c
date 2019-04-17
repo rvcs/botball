@@ -1,31 +1,32 @@
 #include <kipr/botball.h>
-int rotateTime = 2050;
+int rotateTime = 2000;
 int rightWheelPercent = 100;
-int leftWheelPercent =97;
+int leftWheelPercent =96;
 int i;
 int main()
 {
-   
-    shut_down_in(180);
-    motor(1,leftWheelPercent);
-    motor(2,rightWheelPercent);
-    msleep(3000);           
+    wait_for_light(0);
+    shut_down_in (119);
     motor(1,-leftWheelPercent);
-    motor(2,rightWheelPercent);
-    msleep(rotateTime);
-    motor(1,leftWheelPercent);
-    motor(2,rightWheelPercent);
-    msleep(6000);
     motor(2,-rightWheelPercent);
-    msleep(rotateTime/4);
-    motor(2,rightWheelPercent);
-    msleep(500);
-    motor(1,-leftWheelPercent);
-    msleep(rotateTime/4);
+    msleep(3000);
+    motor(1,0);
+    motor(2,0);
+    msleep(1500);
     motor(1,leftWheelPercent);
-    msleep(6500);
-   	motor(2,rightWheelPercent);
+    motor(2,rightWheelPercent);
+    msleep(12050);
     motor(1,-leftWheelPercent);
-    msleep(rotateTime*10);
+    motor(2,rightWheelPercent);
+    msleep(rotateTime/2);
+    motor(1,leftWheelPercent);
+    motor(2,-rightWheelPercent);
+    msleep(rotateTime/1.9);
+    motor(1,leftWheelPercent);
+    motor(2,rightWheelPercent);
+    msleep(1280);
+    motor(1,-leftWheelPercent+4);
+    motor(2,rightWheelPercent);
+    msleep(rotateTime*120);
     return 0;
 }
