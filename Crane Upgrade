@@ -1,0 +1,59 @@
+// Created on Wed January 27 2016
+//The plan is to send the Claw onto the opponents side.
+
+//0 is the left motor. 1 is the right motor.
+//in the stimulator 0 is the left motor and 2 is the right motor.
+void stop()
+{
+	motor(0,0);
+	motor(1,0);
+}
+void go( time)
+{
+	motor(0,80);
+	motor(1,100);
+	msleep(time);
+}	
+
+int main()
+{
+	enable_servos();
+	printf("Hello, World!\n");
+	set_servo_position(0, 1175);
+	//getting out of parking:
+	
+	//going forward
+	go(8000);
+	stop();
+	//turning 45 degrees
+	motor(0,100);
+	msleep(1000);
+	stop();
+	//going the distance between the 45 degree turns
+	go(1500);
+	stop();
+	//turning 45 degrees
+	motor(0,100);
+	msleep(1500);
+	stop();
+	//going to the exit of our side
+	go(2000);
+	stop();
+	//going out of our side
+	go (750);
+	
+	//turning 90 degrees
+	motor(0,100);
+	msleep(1600);
+	stop();
+	//going down the chasim between each  teams side
+	go(750);
+	stop();
+	//turning toward the opponent's side
+	motor(1,80);
+	msleep(1600);
+	stop();
+	ao();//stop
+	return 0;
+
+}
